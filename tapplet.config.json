@@ -1,0 +1,21 @@
+{
+  "packageName": "tex-tapplet",
+  "version": "0.1.0",
+  "supportedChain": ["MAINNET", "STAGENET", "NEXTNET"],
+  "permissions": {
+    "requiredPermissions": [
+      "TariPermissionNftGetOwnershipProof",
+      "TariPermissionAccountBalance",
+      "TariPermissionAccountInfo",
+      "TariPermissionAccountList",
+      "TariPermissionKeyList",
+      "TariPermissionTransactionGet",
+      "TariPermissionTransactionSend",
+      "TariPermissionGetNft",
+      "TariPermissionTransactionsGet",
+      "TariPermissionSubstatesRead",
+      "TariPermissionTemplatesRead"
+    ],
+    "optionalPermissions": []
+  }
+}
