@@ -1,0 +1,43 @@
+import { ResourceAddress, TariFunctionDefinition, TariMethodDefinition, WorkspaceArg } from "@tari-project/tarijs"
+import { TemplateFactory } from "@tari-project/tarijs/dist/templates"
+import { Bucket } from "./types"
+
+interface NewFunction extends TariFunctionDefinition {
+  functionName: "new"
+  args?: [ResourceAddress, ResourceAddress]
+}
+
+interface SwapMethod extends TariMethodDefinition {
+  methodName: "swap"
+  args?: [Bucket, ResourceAddress]
+}
+
+interface AddLiquidityMethod extends TariMethodDefinition {
+  methodName: "add_liquidity"
+  args?: WorkspaceArg[]
+}
+
+interface RemoveLiquidityMethod extends TariMethodDefinition {
+  methodName: "remove_liquidity"
+  args?: WorkspaceArg[]
+}
+
+export class TexTemplate extends TemplateFactory {
+  public newTex: NewFunction
+  public swap: SwapMethod
+  public addLiquidity: AddLiquidityMethod
+  public removeLiquidity: RemoveLiquidityMethod
+
+  constructor(public templateAddress: string) {
+    super(templateAddress)
+    this.newTex = this._defineFunction<NewFunction>("new")
+    this.swap = this._defineMethod<SwapMethod>("swap")
+    this.addLiquidity = this._defineMethod<AddLiquidityMethod>("add_liquidity")
+    this.removeLiquidity = this._defineMethod<RemoveLiquidityMethod>("remove_liquidity")
+    this._initFunctions()
+    this._initMethods()
+  }
+
+  protected _initFunctions(): void {}
+  protected _initMethods(): void {}
+}
