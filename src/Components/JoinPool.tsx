@@ -1,13 +1,17 @@
 import { Button, Paper, TextField, Typography } from "@mui/material"
 import React, { useState } from "react"
+import { createCoin } from "../hooks/useTex"
+import { TariUniverseProvider } from "@tari-project/tarijs"
 
 export type InputTokensFormProps = {
   onSubmit: (firstTokenAmount: number, secondTokenAmount: number) => void
   callback: () => void
+  provider: TariUniverseProvider
 }
 
-export const JoinPool = ({ onSubmit, callback }: InputTokensFormProps) => {
+export const JoinPool = ({ onSubmit, callback, provider }: InputTokensFormProps) => {
   const [firstTokenAmount, setFirstTokenAmount] = useState("0")
+  const [coinTemplateAddress, setCoinTemplateAddress] = useState("")
   const [secondTokenAmount, setSecondTokenAmount] = useState("0")
   const [firstTokenError, setFirstTokenError] = useState("")
   const [secondTokenError, setSecondTokenError] = useState("")
@@ -20,8 +24,13 @@ export const JoinPool = ({ onSubmit, callback }: InputTokensFormProps) => {
     if (!isValidInput(firstTokenAmount) || !isValidInput(secondTokenAmount)) {
       throw new Error("Please enter valid integer values")
     }
+    console.log("provider tapplet", provider)
     await onSubmit(Number(firstTokenAmount), Number(secondTokenAmount))
     callback()
+  }
+  const onClickCreate = async () => {
+    console.log("tapplet create coin", coinTemplateAddress)
+    createCoin(provider, coinTemplateAddress, 1223, "TST")
   }
 
   const handleFirstTokenAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,6 +51,16 @@ export const JoinPool = ({ onSubmit, callback }: InputTokensFormProps) => {
       setSecondTokenError("")
     }
     setSecondTokenAmount(value)
+  }
+
+  const handleCoinTemplateAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    if (!isValidInput(value)) {
+      setCoinTemplateAddress("Please enter a valid address")
+    } else {
+      setCoinTemplateAddress("")
+    }
+    setCoinTemplateAddress(value)
   }
 
   return (
@@ -72,6 +91,11 @@ export const JoinPool = ({ onSubmit, callback }: InputTokensFormProps) => {
       />
       <Button onClick={handleSubmit} variant={"contained"}>
         Submit
+      </Button>
+
+      <TextField label="Coin template address" value={coinTemplateAddress} onChange={handleCoinTemplateAddressChange} />
+      <Button onClick={onClickCreate} variant={"contained"}>
+        {`Create token A with init supply ${firstTokenAmount}`}
       </Button>
     </Paper>
   )
