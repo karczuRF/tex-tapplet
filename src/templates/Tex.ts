@@ -4,7 +4,7 @@ import { Bucket } from "./types"
 
 interface NewFunction extends TariFunctionDefinition {
   functionName: "new"
-  args?: [ResourceAddress, ResourceAddress]
+  args?: [number]
 }
 
 interface SwapMethod extends TariMethodDefinition {

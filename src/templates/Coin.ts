@@ -34,7 +34,7 @@ interface TotalSupplyMethod extends TariMethodDefinition {
 }
 
 export class CoinTemplate extends TemplateFactory {
-  public newCoin: NewFunction
+  public new: NewFunction
   public mint: MintFunction
   public takeFreeCoins: TakeFreeCoinsMethod
   public balance: BalanceMethod
@@ -44,7 +44,7 @@ export class CoinTemplate extends TemplateFactory {
 
   constructor(public templateAddress: string) {
     super(templateAddress)
-    this.newCoin = this._defineFunction<NewFunction>("new")
+    this.new = this._defineFunction<NewFunction>("new")
     this.mint = this._defineFunction<MintFunction>("mint")
     this.takeFreeCoins = this._defineMethod<TakeFreeCoinsMethod>("take_free_coins")
     this.balance = this._defineMethod<BalanceMethod>("balance")
