@@ -3,7 +3,7 @@ import { TemplateFactory } from "@tari-project/tarijs/dist/templates"
 
 interface NewFunction extends TariFunctionDefinition {
   functionName: "new"
-  args?: [Amount, string]
+  args?: [number, string]
 }
 
 interface MintFunction extends TariFunctionDefinition {
