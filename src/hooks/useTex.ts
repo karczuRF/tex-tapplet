@@ -53,24 +53,27 @@ export async function createCoin(
   const account = await provider.getAccount()
   const builder = new TransactionBuilder()
   const coin = new CoinTemplate(coinTemplateAddress)
-  const supply = new Amount(initSupply)
+  // const supply = new Amount(initSupply)
 
-  console.log("CREATE COIN PARAMS", account, coin.templateAddress)
+  console.log("👋 [tapp createCoin] account", account)
+  console.log("👋 [tapp createCoin] template", coin.templateAddress)
+  console.log("👋 [tapp createCoin] params", initSupply, symbol)
   const newCoinTx: Transaction = builder
-    .callFunction(coin.new, [supply, symbol])
+    .callFunction(coin.new, [initSupply, symbol])
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
 
-  console.log("CREATE COIN tx", newCoinTx)
+  console.log("👋 [tapp createCoin] new coin tx", newCoinTx)
   const required_substates = [{ substate_id: account.address }]
   const req = buildTransactionRequest(newCoinTx, account.account_id, required_substates)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
-  console.log("CREATE COIN response", response)
+  console.log("👋 [tapp createCoin] tx resulrt", txResult)
+  console.log("👋 [tapp createCoin] tx response", response)
   if (!response) throw new Error("Failed to create coin")
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
   if (!upSubstates) throw new Error("No up substates found")
-  console.log("Up substates: ", upSubstates)
+  console.log("👋 [tapp createCoin] Up substates: ", upSubstates)
   const token: Token = {
     substate: {
       resource: upSubstates[1][0].Resource,
@@ -88,7 +91,7 @@ export async function createTex(provider: TariProvider, texTemplateAddress: stri
   const tex = new TexTemplate(texTemplateAddress)
   const swapFeeAmount = 10 //`fee` represents a percentage, so it must be between 0 and 100
 
-  const transaction: Transaction = builder.callFunction(tex.newTex, [swapFeeAmount]).build()
+  const transaction: Transaction = builder.callFunction(tex.new, [swapFeeAmount]).build()
 
   const required_substates = [{ substate_id: account.address }]
   const req = buildTransactionRequest(transaction, account.account_id, required_substates)

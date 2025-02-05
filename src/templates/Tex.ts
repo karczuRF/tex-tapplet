@@ -23,14 +23,14 @@ interface RemoveLiquidityMethod extends TariMethodDefinition {
 }
 
 export class TexTemplate extends TemplateFactory {
-  public newTex: NewFunction
+  public new: NewFunction
   public swap: SwapMethod
   public addLiquidity: AddLiquidityMethod
   public removeLiquidity: RemoveLiquidityMethod
 
   constructor(public templateAddress: string) {
     super(templateAddress)
-    this.newTex = this._defineFunction<NewFunction>("new")
+    this.new = this._defineFunction<NewFunction>("new")
     this.swap = this._defineMethod<SwapMethod>("swap")
     this.addLiquidity = this._defineMethod<AddLiquidityMethod>("add_liquidity")
     this.removeLiquidity = this._defineMethod<RemoveLiquidityMethod>("remove_liquidity")
