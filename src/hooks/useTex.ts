@@ -58,14 +58,14 @@ export async function createCoin(
   console.log("👋 [tapp createCoin] account", account)
   console.log("👋 [tapp createCoin] template", coin.templateAddress)
   console.log("👋 [tapp createCoin] params", initSupply, symbol)
-  const newCoinTx: Transaction = builder
+  const tx: Transaction = builder
     .callFunction(coin.new, [initSupply, symbol])
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
 
-  console.log("👋 [tapp createCoin] new coin tx", newCoinTx)
+  console.log("👋 [tapp createCoin] new coin tx", tx)
   const required_substates = [{ substate_id: account.address }]
-  const req = buildTransactionRequest(newCoinTx, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   console.log("👋 [tapp createCoin] tx resulrt", txResult)
   console.log("👋 [tapp createCoin] tx response", response)
@@ -91,10 +91,10 @@ export async function createTex(provider: TariProvider, texTemplateAddress: stri
   const tex = new TexTemplate(texTemplateAddress)
   const swapFeeAmount = 10 //`fee` represents a percentage, so it must be between 0 and 100
 
-  const transaction: Transaction = builder.callFunction(tex.new, [swapFeeAmount]).build()
+  const tx: Transaction = builder.callFunction(tex.new, [swapFeeAmount]).build()
 
   const required_substates = [{ substate_id: account.address }]
-  const req = buildTransactionRequest(transaction, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   if (!response) throw new Error("Failed to create coin")
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,7 +123,7 @@ export async function addLiquidity(
 
     const required_substates = [{ substate_id: account.address }, { substate_id: tex.templateAddress }]
 
-    const transaction = builder
+    const tx = builder
       .callMethod(accountComponent.withdraw, [resourceAddressA, amountA])
       .saveVar("tokenA")
       .callMethod(accountComponent.withdraw, [resourceAddressB, amountB])
@@ -134,10 +134,9 @@ export async function addLiquidity(
       .callMethod(accountComponent.payFee, [fee])
       .build()
 
-    const req = buildTransactionRequest(transaction, account.account_id, required_substates)
-    const tx = await submitAndWaitForTransaction(provider, req)
-
-    return tx.result
+    const req = buildTransactionRequest(tx, account.account_id, required_substates)
+    const result = await submitAndWaitForTransaction(provider, req)
+    return result
   } catch (error) {
     console.error(error)
   }
@@ -156,7 +155,7 @@ export async function removeLiquidity(
   const amountLp = new Amount(amountLpToken)
   const fee = new Amount(2000)
 
-  const transaction = builder
+  const tx = builder
     .callMethod(accountComponent.withdraw, [lpTokenResourceAddress, amountLp])
     .saveVar("lp")
     .callMethod(tex.removeLiquidity, [fromWorkspace("lp")])
@@ -167,7 +166,7 @@ export async function removeLiquidity(
     .build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
-  const req = buildTransactionRequest(transaction, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates)
   const result = await submitAndWaitForTransaction(provider, req)
   return result
 }
@@ -187,7 +186,7 @@ export async function swap(
   const fee = new Amount(2000)
 
   // TODO fix it
-  const transaction = builder
+  const tx = builder
     .callMethod(accountComponent.withdraw, [inputToken, amountInput])
     .saveVar("inputToken")
     .callMethod(tex.swap, [{ BucketId: 0 }, outputToken]) //TODO fix type error
@@ -197,8 +196,39 @@ export async function swap(
     .build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
-  const req = buildTransactionRequest(transaction, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates)
   const result = await submitAndWaitForTransaction(provider, req)
 
   return result
+}
+
+export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplateAddress: string, amount: number) {
+  const account = await provider.getAccount()
+  const builder = new TransactionBuilder()
+  const coin = new CoinTemplate(coinTemplateAddress)
+  const accountComponent = new AccountTemplate(account.address)
+
+  console.log("👋 [tapp takeFreeCoins] account", account)
+  console.log("👋 [tapp takeFreeCoins] template", coin.templateAddress)
+  console.log("👋 [tapp takeFreeCoins] params", account)
+  const tx: Transaction = builder
+    .callMethod(coin.takeFreeCoins, [amount])
+    .saveVar("coins")
+    .callMethod(accountComponent.deposit, [fromWorkspace("coins")])
+    .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
+    .build()
+
+  console.log("👋 [tapp takeFreeCoins] new coin tx", tx)
+  const required_substates = [{ substate_id: account.address }, { substate_id: coinTemplateAddress }]
+  const req = buildTransactionRequest(tx, account.account_id, required_substates)
+  const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
+  console.log("👋 [tapp takeFreeCoins] tx resulrt", txResult)
+  console.log("👋 [tapp takeFreeCoins] tx response", response)
+  if (!response) throw new Error("Failed to create coin")
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
+  if (!upSubstates) throw new Error("No up substates found")
+  console.log("👋 [tapp takeFreeCoins] Up substates: ", upSubstates)
+
+  return txResult
 }

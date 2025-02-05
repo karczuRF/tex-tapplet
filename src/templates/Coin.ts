@@ -18,7 +18,7 @@ interface VaultAddressMethod extends TariMethodDefinition {
 
 interface TakeFreeCoinsMethod extends TariMethodDefinition {
   methodName: "take_free_coins"
-  args?: [Amount]
+  args?: [number]
 }
 interface BalanceMethod extends TariMethodDefinition {
   methodName: "balance"
