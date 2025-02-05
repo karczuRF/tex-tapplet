@@ -1,4 +1,4 @@
-import { Button, Paper, TextField, Typography } from "@mui/material"
+import { Box, Button, Paper, TextField, Typography } from "@mui/material"
 import React, { useState } from "react"
 import { createCoin } from "../hooks/useTex"
 import { TariUniverseProvider } from "@tari-project/tarijs"
@@ -64,39 +64,45 @@ export const JoinPool = ({ onSubmit, callback, provider }: InputTokensFormProps)
   }
 
   return (
-    <Paper
-      style={{
-        display: "grid",
-        gridRowGap: "20px",
-        padding: "20px",
-      }}
-    >
-      <Typography variant="h4">Join the pool with tokens:</Typography>
+    <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%">
+      <Paper
+        style={{
+          display: "grid",
+          gridRowGap: "20px",
+          padding: "20px",
+        }}
+      >
+        <Typography variant="h4">Join the pool with tokens:</Typography>
 
-      <TextField
-        label="Token A amount"
-        value={firstTokenAmount}
-        onChange={handleFirstTokenAmountChange}
-        error={!!firstTokenError}
-        helperText={firstTokenError}
-        required
-      />
-      <TextField
-        label="Token B amount"
-        value={secondTokenAmount}
-        onChange={handleSecondTokenAmountChange}
-        error={!!secondTokenError}
-        helperText={secondTokenError}
-        required
-      />
-      <Button onClick={handleSubmit} variant={"contained"}>
-        Submit
-      </Button>
+        <TextField
+          label="Token A amount"
+          value={firstTokenAmount}
+          onChange={handleFirstTokenAmountChange}
+          error={!!firstTokenError}
+          helperText={firstTokenError}
+          required
+        />
+        <TextField
+          label="Token B amount"
+          value={secondTokenAmount}
+          onChange={handleSecondTokenAmountChange}
+          error={!!secondTokenError}
+          helperText={secondTokenError}
+          required
+        />
+        <Button onClick={handleSubmit} variant={"contained"}>
+          Submit
+        </Button>
 
-      <TextField label="Coin template address" value={coinTemplateAddress} onChange={handleCoinTemplateAddressChange} />
-      <Button onClick={onClickCreate} variant={"contained"}>
-        {`Create token A with init supply ${firstTokenAmount}`}
-      </Button>
-    </Paper>
+        <TextField
+          label="Coin template address"
+          value={coinTemplateAddress}
+          onChange={handleCoinTemplateAddressChange}
+        />
+        <Button onClick={onClickCreate} variant={"contained"}>
+          {`Create token A with init supply ${firstTokenAmount}`}
+        </Button>
+      </Paper>
+    </Box>
   )
 }

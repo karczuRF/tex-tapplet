@@ -1,5 +1,5 @@
 import "./App.css"
-import { Box, Paper, Typography } from "@mui/material"
+import { AppBar, Box, Tab, Tabs } from "@mui/material"
 import { ExitPool, JoinPool, Swap } from "./Components"
 import {
   TariPermissions,
@@ -7,7 +7,8 @@ import {
   TariUniverseProviderParameters,
   permissions as walletPermissions,
 } from "@tari-project/tarijs"
-import { useRef } from "react"
+import { useRef, useState } from "react"
+import { Tokens } from "./Components/Tokens"
 
 const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
   walletPermissions
@@ -23,34 +24,92 @@ const params: TariUniverseProviderParameters = {
   optionalPermissions,
 }
 
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  )
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  }
+}
+
 function App() {
+  // const classes = useStyles()
   const provider = useRef<TariUniverseProvider>(new TariUniverseProvider(params))
 
-  const handlePlaceholder = async (): Promise<void> => {}
+  const [value, setValue] = useState(0)
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue)
+  }
+  const handlePlaceholder = () => {}
+
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" gap={6} flexDirection="column">
-      <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-        <Paper variant="outlined" elevation={0} sx={{ padding: 4, margin: 3, borderRadius: 4 }}>
-          <Typography variant="h6" textAlign="center">
-            Pool state
-          </Typography>
-          <Typography>Pool token A balance: </Typography>
-          <Typography>Pool token B balance: </Typography>
-          <Typography>LP token total supply: </Typography>
-        </Paper>
-        <Paper variant="outlined" elevation={0} sx={{ padding: 4, margin: 3, borderRadius: 4 }}>
-          <Typography variant="h6" textAlign="center">
-            Your balances
-          </Typography>
-          <Typography>Your token A balance: </Typography>
-          <Typography>Your token B balance: </Typography>
-          <Typography>Your LP token balance: </Typography>
-        </Paper>
-      </Box>
-      <Box display="flex" justifyContent="center" alignItems="center" width="100%" height="100%" gap={4} flexGrow={1}>
-        <JoinPool onSubmit={handlePlaceholder} callback={handlePlaceholder} provider={provider.current} />
-        <ExitPool onSubmit={handlePlaceholder} callback={handlePlaceholder} />
-        <Swap handleSwap={handlePlaceholder} callback={handlePlaceholder} />
+    <Box
+      sx={{
+        height: "100vh",
+        width: "100vw",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <AppBar position="static" color="default">
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          textColor="primary"
+          indicatorColor="primary"
+          variant="fullWidth"
+          aria-label="tapplet-tabs"
+        >
+          <Tab label="Join Pool" {...a11yProps(0)} />
+          <Tab label="Exit Pool" {...a11yProps(1)} />
+          <Tab label="Swap" {...a11yProps(2)} />
+          <Tab label="Tokens" {...a11yProps(3)} />
+        </Tabs>
+      </AppBar>
+      <Box
+        sx={{
+          flex: 1,
+          bgcolor: "background.paper",
+          display: "flex",
+          alignItems: "center", // Center vertically
+          justifyContent: "center", // Center horizontally
+          backgroundColor: "#e6e6ff",
+        }}
+      >
+        <CustomTabPanel value={value} index={0}>
+          <JoinPool onSubmit={handlePlaceholder} callback={handlePlaceholder} provider={provider.current} />
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={1}>
+          <ExitPool onSubmit={handlePlaceholder} callback={handlePlaceholder} />
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={2}>
+          <Swap handleSwap={handlePlaceholder} callback={handlePlaceholder} />
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={3}>
+          <Tokens provider={provider.current}></Tokens>
+        </CustomTabPanel>
       </Box>
     </Box>
   )

@@ -37,30 +37,32 @@ export const Swap = ({ handleSwap, callback }: SwapProps) => {
   }
 
   return (
-    <Paper
-      style={{
-        display: "grid",
-        gridRowGap: "20px",
-        padding: "20px",
-      }}
-    >
-      <Typography variant="h4"> Swap tokens: </Typography>
+    <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Paper
+        style={{
+          display: "grid",
+          gridRowGap: "20px",
+          padding: "20px",
+        }}
+      >
+        <Typography variant="h4"> Swap tokens: </Typography>
 
-      <TextField
-        label={firstToSecond ? "Token A amount" : "Token B amount"}
-        value={tokenAmount}
-        onChange={handleFirstTokenAmountChange}
-        error={!!tokenAmountError}
-        helperText={tokenAmountError}
-        required
-      />
-      <Box display="flex" alignItems="center">
-        <Switch value={firstToSecond} onChange={() => setFirstToSecond(!firstToSecond)} />
-        <Typography>{firstToSecond ? "Token A to Token B" : "Token B to Token A"}</Typography>
-      </Box>
-      <Button onClick={handleSubmit} variant={"contained"}>
-        Submit
-      </Button>
-    </Paper>
+        <TextField
+          label={firstToSecond ? "Token A amount" : "Token B amount"}
+          value={tokenAmount}
+          onChange={handleFirstTokenAmountChange}
+          error={!!tokenAmountError}
+          helperText={tokenAmountError}
+          required
+        />
+        <Box display="flex" alignItems="center">
+          <Switch value={firstToSecond} onChange={() => setFirstToSecond(!firstToSecond)} />
+          <Typography>{firstToSecond ? "Token A to Token B" : "Token B to Token A"}</Typography>
+        </Box>
+        <Button onClick={handleSubmit} variant={"contained"}>
+          Submit
+        </Button>
+      </Paper>
+    </Box>
   )
 }
