@@ -209,7 +209,8 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
   const accountComponent = new AccountTemplate(account.address)
 
   console.log("👋 [tapp takeFreeCoins] account", account)
-  console.log("👋 [tapp takeFreeCoins] template", coin.templateAddress)
+  console.log("👋 [tapp takeFreeCoins] coin template as arg", coinTemplateAddress)
+  console.log("👋 [tapp takeFreeCoins] coin.templateAddress", coin.templateAddress)
   console.log("👋 [tapp takeFreeCoins] params", account)
   const tx: Transaction = builder
     .callMethod(coin.takeFreeCoins, [amount])
@@ -220,6 +221,7 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
 
   console.log("👋 [tapp takeFreeCoins] new coin tx", tx)
   const required_substates = [{ substate_id: account.address }, { substate_id: coinTemplateAddress }]
+  console.log("👋 [tapp takeFreeCoins] required substate", required_substates)
   const req = buildTransactionRequest(tx, account.account_id, required_substates)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   console.log("👋 [tapp takeFreeCoins] tx resulrt", txResult)

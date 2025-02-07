@@ -95,7 +95,7 @@ function App() {
           display: "flex",
           alignItems: "center", // Center vertically
           justifyContent: "center", // Center horizontally
-          backgroundColor: "#e6e6ff",
+          backgroundColor: "#c1c4c9",
         }}
       >
         <CustomTabPanel value={value} index={0}>
