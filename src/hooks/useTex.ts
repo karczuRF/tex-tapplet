@@ -66,7 +66,7 @@ export async function createCoin(
 
   console.log("👋 [tapp createCoin] new coin tx", tx)
   const required_substates = [{ substate_id: account.address }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   console.log("👋 [tapp createCoin] tx resulrt", txResult)
   console.log("👋 [tapp createCoin] tx response", response)

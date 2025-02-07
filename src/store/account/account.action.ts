@@ -18,12 +18,15 @@ export const initializeAction = () => ({
       const dispatch = listenerApi.dispatch
       const state = listenerApi.getState() as RootState
       const provider = state.provider.provider
+      console.log("[TEX][STORE] INIT ACC PROVIDER", provider)
 
       if (!provider) {
         dispatch(errorActions.showError({ message: "failed-to-find-provider", errorSource: ErrorSource.FRONTEND }))
         return
       }
+      console.log("[TEX][STORE] GET ACC")
       const acc = await provider.getAccount()
+      console.log("[TEX][STORE] GET ACC OK", acc)
       listenerApi.dispatch(
         accountActions.setAccountSuccess({
           account: {

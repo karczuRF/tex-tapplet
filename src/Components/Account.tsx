@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux"
 import { accountSelector } from "../store/account/account.selector"
-import { substateIdToString } from "@tari-project/typescript-bindings"
 import { Box, Paper, Stack, Typography } from "@mui/material"
+import { substateIdToString } from "@tari-project/typescript-bindings"
 
 // TODO this component is just tmp to show and control provider/account
 export const Account = () => {
