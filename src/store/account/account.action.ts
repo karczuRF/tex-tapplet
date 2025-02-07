@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { accountActions } from "./account.slice"
 
@@ -22,11 +23,18 @@ export const initializeAction = () => ({
         dispatch(errorActions.showError({ message: "failed-to-find-provider", errorSource: ErrorSource.FRONTEND }))
         return
       }
-      const defaultAccount = await provider.client.accountsGetDefault({})
-
+      const acc = await provider.getAccount()
       listenerApi.dispatch(
         accountActions.setAccountSuccess({
-          account: defaultAccount,
+          account: {
+            account: {
+              address: acc.address as any,
+              is_default: true,
+              key_index: acc.account_id,
+              name: "default",
+            },
+            public_key: acc.public_key,
+          },
         })
       )
     } catch (error) {
@@ -53,18 +61,27 @@ export const setAccountAction = () => ({
 
       // if tapplet uses TU Provider it gets default account
       // this is to make sure tapplet uses the account selected by the user
-      await provider.client.accountsSetDefault({
-        account: {
-          Name: action.payload.accountName,
-        },
-      })
-      const account = await provider.client.accountsGet({
-        name_or_address: { Name: action.payload.accountName },
-      })
+      // await provider.client.accountsSetDefault({
+      //   account: {
+      //     Name: action.payload.accountName,
+      //   },
+      // })
+      // const account = await provider.client.accountsGet({
+      //   name_or_address: { Name: action.payload.accountName },
+      // })
+      const acc = await provider.getAccount()
 
       listenerApi.dispatch(
         accountActions.setAccountSuccess({
-          account,
+          account: {
+            account: {
+              address: acc.address as any,
+              is_default: true,
+              key_index: acc.account_id,
+              name: action.payload.accountName,
+            },
+            public_key: acc.public_key,
+          },
         })
       )
     } catch (error) {

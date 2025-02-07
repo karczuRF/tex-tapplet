@@ -7,8 +7,11 @@ import {
   TariUniverseProviderParameters,
   permissions as walletPermissions,
 } from "@tari-project/tarijs"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Tokens } from "./Components/Tokens"
+import { providerActions } from "./store/provider/provider.slice"
+import { accountActions } from "./store/account/account.slice"
+import { useDispatch } from "react-redux"
 
 const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
   walletPermissions
@@ -56,6 +59,11 @@ function a11yProps(index: number) {
 function App() {
   // const classes = useStyles()
   const provider = useRef<TariUniverseProvider>(new TariUniverseProvider(params))
+  const dispatch = useDispatch()
+  useEffect(() => {
+    dispatch(providerActions.initializeRequest({}))
+    dispatch(accountActions.initializeRequest({}))
+  }, [])
 
   const [value, setValue] = useState(0)
 
@@ -108,7 +116,7 @@ function App() {
           <Swap handleSwap={handlePlaceholder} callback={handlePlaceholder} />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={3}>
-          <Tokens provider={provider.current}></Tokens>
+          <Tokens />
         </CustomTabPanel>
       </Box>
     </Box>

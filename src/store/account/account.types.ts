@@ -5,6 +5,7 @@ export type AccountStoreState = {
   account: AccountInfo | null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type InitAccountRequestPayload = {}
 export type InitAccountFailurePayload = {
   errorMsg: string
