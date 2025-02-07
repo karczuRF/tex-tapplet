@@ -3,12 +3,15 @@ import React, { useState } from "react"
 import { createCoin, takeFreeCoins } from "../hooks/useTex"
 import { TariUniverseProvider } from "@tari-project/tarijs"
 import { Token } from "../templates/types"
+import { Account } from "./Account"
+import { useSelector } from "react-redux"
+import { providerSelector } from "../store/provider/provider.selector"
 
 export type InputTokensFormProps = {
   provider: TariUniverseProvider
 }
 
-export const Tokens = ({ provider }: InputTokensFormProps) => {
+export const Tokens = () => {
   const [tokenInitSupply, setTokenInitSupply] = useState("0")
   const [tokenAmount, setTokenAmount] = useState("0")
   const [tokenTemplateAddress, setTokenTemplateAddress] = useState("")
@@ -16,6 +19,7 @@ export const Tokens = ({ provider }: InputTokensFormProps) => {
   const [tokenSymbol, setTokenSymbol] = useState("")
   const [tokenError, setTokenError] = useState("")
   const [tokensList, setTokensList] = useState<Token[]>()
+  const provider = useSelector(providerSelector.selectProvider)
 
   const isValidNumberInput = (input: string) => {
     return Number.isInteger(Number(input)) && input !== ""
@@ -26,6 +30,7 @@ export const Tokens = ({ provider }: InputTokensFormProps) => {
   }
 
   const handleSubmit = async () => {
+    if (!provider) return
     if (!isValidNumberInput(tokenInitSupply) || !isValidTextInput(tokenSymbol)) {
       throw new Error("Please enter valid token values")
     }
@@ -75,12 +80,15 @@ export const Tokens = ({ provider }: InputTokensFormProps) => {
     if (!isValidNumberInput(tokenAmount)) {
       throw new Error("Please enter valid token values")
     }
+    if (!provider) return
+    console.log("[TAPP take free coins] provider", provider)
     const resp = await takeFreeCoins(provider, tokenAddress, Number(tokenAmount))
     console.log("[TAPP take free coins] resp", resp)
   }
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%" gap="20px">
+    <Box display="grid" justifyContent="center" alignItems="center" height="100%" width="100%" gap="20px">
+      <Account />
       <Paper
         style={{
           display: "grid",
@@ -134,10 +142,11 @@ export const Tokens = ({ provider }: InputTokensFormProps) => {
             display: "grid",
             gridRowGap: "20px",
             padding: "20px",
+            maxWidth: "50%",
           }}
         >
           {tokensList.map((token, index) => (
-            <Typography key={index} variant="h4">
+            <Typography key={index} variant="h6">
               {index}. {token.symbol} {token.balance} {token.substate.component}
             </Typography>
           ))}
@@ -148,6 +157,7 @@ export const Tokens = ({ provider }: InputTokensFormProps) => {
             display: "grid",
             gridRowGap: "20px",
             padding: "20px",
+            maxWidth: "100%",
           }}
         >
           <Typography variant="h4">No tokens</Typography>

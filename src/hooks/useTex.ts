@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AccountTemplate } from "@tari-project/tarijs/dist/templates/index"
 import {
   Amount,
@@ -70,7 +71,7 @@ export async function createCoin(
   console.log("👋 [tapp createCoin] tx resulrt", txResult)
   console.log("👋 [tapp createCoin] tx response", response)
   if (!response) throw new Error("Failed to create coin")
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
   if (!upSubstates) throw new Error("No up substates found")
   console.log("👋 [tapp createCoin] Up substates: ", upSubstates)
@@ -97,7 +98,7 @@ export async function createTex(provider: TariProvider, texTemplateAddress: stri
   const req = buildTransactionRequest(tx, account.account_id, required_substates)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   if (!response) throw new Error("Failed to create coin")
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
   if (!upSubstates) throw new Error("No up substates found")
   console.log("Up substates: ", upSubstates)
@@ -212,24 +213,36 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
   console.log("👋 [tapp takeFreeCoins] coin template as arg", coinTemplateAddress)
   console.log("👋 [tapp takeFreeCoins] coin.templateAddress", coin.templateAddress)
   console.log("👋 [tapp takeFreeCoins] params", account)
+  const required_substates = [{ substate_id: account.address }, { substate_id: coin.templateAddress }]
+  console.log("👋 [tapp takeFreeCoins] required substate", required_substates)
+
+  const txb: Transaction = builder
+    .addInput({ substateId: coinTemplateAddress as any })
+    .callMethod(coin.totalSupply, [])
+    .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
+    .build()
+  console.log("👋 [tapp takeFreeCoins] TOTAL SUPPLY TX", txb)
+  const reqb = buildTransactionRequest(txb, account.account_id, required_substates)
+  const { response: bb, result: txResultb } = await submitAndWaitForTransaction(provider, reqb)
+  console.log("👋 [tapp takeFreeCoins] TOTAL SUPPLY RESPONSE", txb, txResultb, bb)
+
   const tx: Transaction = builder
     .callMethod(coin.takeFreeCoins, [amount])
-    .saveVar("coins")
-    .callMethod(accountComponent.deposit, [fromWorkspace("coins")])
+    .saveVar("coin")
+    .callMethod(accountComponent.deposit, [fromWorkspace("coin")])
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
 
   console.log("👋 [tapp takeFreeCoins] new coin tx", tx)
-  const required_substates = [{ substate_id: account.address }, { substate_id: coinTemplateAddress }]
   console.log("👋 [tapp takeFreeCoins] required substate", required_substates)
   const req = buildTransactionRequest(tx, account.account_id, required_substates)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   console.log("👋 [tapp takeFreeCoins] tx resulrt", txResult)
   console.log("👋 [tapp takeFreeCoins] tx response", response)
-  if (!response) throw new Error("Failed to create coin")
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!response) throw new Error("Failed to create coin: no response found")
+
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
-  if (!upSubstates) throw new Error("No up substates found")
+  if (!upSubstates) console.warn("👋 [tapp takeFreeCoins] No up susbsates found")
   console.log("👋 [tapp takeFreeCoins] Up substates: ", upSubstates)
 
   return txResult
