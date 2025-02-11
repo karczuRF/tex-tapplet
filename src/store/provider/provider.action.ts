@@ -1,8 +1,11 @@
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { InitProviderRequestPayload, UpdatePermissionsRequestPayload } from "./provider.types"
 import { providerActions } from "./provider.slice"
-import { WalletDaemonParameters } from "@tari-project/tarijs"
-import { TariPermissions, TariUniverseProvider } from "@tari-project/tarijs/dist/providers/tari_universe"
+import {
+  TariPermissions,
+  TariUniverseProvider,
+  TariUniverseProviderParameters,
+} from "@tari-project/tarijs/dist/providers/tari_universe"
 
 export const initializeAction = () => ({
   actionCreator: providerActions.initializeRequest,
@@ -16,7 +19,7 @@ export const initializeAction = () => ({
       const optionalPermissions = new TariPermissions()
       permissions.addPermission("Admin")
 
-      const params: WalletDaemonParameters = {
+      const params: TariUniverseProviderParameters = {
         name: "TariUniverseProvider",
         permissions,
         optionalPermissions,

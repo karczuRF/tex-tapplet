@@ -7,13 +7,13 @@ export type InitTokensResponse = {
   secondToken: Token
 }
 
-export type Substate = {
+export type TokenSubstate = {
   resource: string
   component: string
 }
 
 export type Token = {
-  substate: Substate
+  substate: TokenSubstate
   symbol: string
   balance: number
 }

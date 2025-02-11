@@ -22,11 +22,17 @@ interface RemoveLiquidityMethod extends TariMethodDefinition {
   args?: WorkspaceArg[]
 }
 
+interface PoolsMethod extends TariMethodDefinition {
+  methodName: "pools"
+  args?: WorkspaceArg[]
+}
+
 export class TexTemplate extends TemplateFactory {
   public new: NewFunction
   public swap: SwapMethod
   public addLiquidity: AddLiquidityMethod
   public removeLiquidity: RemoveLiquidityMethod
+  public pools: PoolsMethod
 
   constructor(public templateAddress: string) {
     super(templateAddress)
@@ -34,6 +40,7 @@ export class TexTemplate extends TemplateFactory {
     this.swap = this._defineMethod<SwapMethod>("swap")
     this.addLiquidity = this._defineMethod<AddLiquidityMethod>("add_liquidity")
     this.removeLiquidity = this._defineMethod<RemoveLiquidityMethod>("remove_liquidity")
+    this.pools = this._defineMethod<PoolsMethod>("pools")
     this._initFunctions()
     this._initMethods()
   }
