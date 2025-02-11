@@ -3,17 +3,21 @@ import { AccountTemplate } from "@tari-project/tarijs/dist/templates/index"
 import {
   Amount,
   buildTransactionRequest,
+  ComponentAddress,
   fromWorkspace,
+  ResourceAddress,
   submitAndWaitForTransaction,
   TariProvider,
   TariUniverseProvider,
   Transaction,
   TransactionBuilder,
+  UpSubstates,
 } from "@tari-project/tarijs"
 import { TexTemplate } from "../templates/Tex"
-import { Token } from "../templates/types"
+import { Token, TokenSubstate } from "../templates/types"
 import { CoinTemplate } from "../templates/Coin"
 import { getAcceptResultSubstates } from "@tari-project/tarijs/dist/builders/helpers/submitTransaction"
+import { substateIdToString } from "@tari-project/typescript-bindings"
 
 export const FEE_AMOUNT = "2000"
 export const INIT_SUPPLY = "100000"
@@ -45,12 +49,42 @@ export const defaultSecondToken: Token = {
   balance: 0,
 }
 
+function extractNumericPart(address: string): string {
+  const match = address.match(/_(\d+)$/)
+  return match ? match[1] : ""
+}
+
+// Function to find and return Token if both Resource and Component exist with the same value
+function findToken(upSubstates: UpSubstates): TokenSubstate | null {
+  const components: { [key: string]: ComponentAddress } = {}
+  const resources: { [key: string]: ResourceAddress } = {}
+
+  for (const [substateId] of upSubstates) {
+    const substate = substateIdToString(substateId)
+    if (substate.startsWith("component_")) {
+      components[extractNumericPart(substate)] = substate
+    }
+    if (substate.startsWith("resource_")) {
+      resources[extractNumericPart(substate)] = substate
+    }
+  }
+  for (const key in components) {
+    if (resources[key]) {
+      return {
+        component: components[key],
+        resource: resources[key],
+      }
+    }
+  }
+  return null
+}
+
 export async function createCoin(
   provider: TariUniverseProvider,
   coinTemplateAddress: string,
   initSupply: number,
   symbol: string
-) {
+): Promise<Token | null> {
   const account = await provider.getAccount()
   const builder = new TransactionBuilder()
   const coin = new CoinTemplate(coinTemplateAddress)
@@ -72,18 +106,18 @@ export async function createCoin(
   console.log("👋 [tapp createCoin] tx response", response)
   if (!response) throw new Error("Failed to create coin")
 
-  const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
+  const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates
   if (!upSubstates) throw new Error("No up substates found")
   console.log("👋 [tapp createCoin] Up substates: ", upSubstates)
-  const token: Token = {
-    substate: {
-      resource: upSubstates[1][0].Resource,
-      component: upSubstates[3][0].Component,
-    },
-    symbol: symbol,
-    balance: initSupply,
-  }
-  return token
+  const tokenSubstate = findToken(upSubstates)
+
+  return tokenSubstate
+    ? {
+        substate: tokenSubstate,
+        symbol: symbol,
+        balance: initSupply,
+      }
+    : null
 }
 
 export async function createTex(provider: TariProvider, texTemplateAddress: string) {
@@ -95,7 +129,7 @@ export async function createTex(provider: TariProvider, texTemplateAddress: stri
   const tx: Transaction = builder.callFunction(tex.new, [swapFeeAmount]).build()
 
   const required_substates = [{ substate_id: account.address }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   if (!response) throw new Error("Failed to create coin")
 
@@ -135,7 +169,7 @@ export async function addLiquidity(
       .callMethod(accountComponent.payFee, [fee])
       .build()
 
-    const req = buildTransactionRequest(tx, account.account_id, required_substates)
+    const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
     const result = await submitAndWaitForTransaction(provider, req)
     return result
   } catch (error) {
@@ -167,7 +201,7 @@ export async function removeLiquidity(
     .build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
   const result = await submitAndWaitForTransaction(provider, req)
   return result
 }
@@ -197,7 +231,7 @@ export async function swap(
     .build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
   const result = await submitAndWaitForTransaction(provider, req)
 
   return result
@@ -222,7 +256,7 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
   console.log("👋 [tapp takeFreeCoins] TOTAL SUPPLY TX", txb)
-  const reqb = buildTransactionRequest(txb, account.account_id, required_substates)
+  const reqb = buildTransactionRequest(txb, account.account_id, required_substates, [], false, 0x10)
   const { response: bb, result: txResultb } = await submitAndWaitForTransaction(provider, reqb)
   console.log("👋 [tapp takeFreeCoins] TOTAL SUPPLY RESPONSE", txb, txResultb, bb)
 
@@ -235,7 +269,7 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
 
   console.log("👋 [tapp takeFreeCoins] new coin tx", tx)
   console.log("👋 [tapp takeFreeCoins] required substate", required_substates)
-  const req = buildTransactionRequest(tx, account.account_id, required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   console.log("👋 [tapp takeFreeCoins] tx resulrt", txResult)
   console.log("👋 [tapp takeFreeCoins] tx response", response)
@@ -244,6 +278,38 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
   if (!upSubstates) console.warn("👋 [tapp takeFreeCoins] No up susbsates found")
   console.log("👋 [tapp takeFreeCoins] Up substates: ", upSubstates)
+
+  return txResult
+}
+
+export async function createPool(provider: TariUniverseProvider, texTemplateAddress: string) {
+  const account = await provider.getAccount()
+  const builder = new TransactionBuilder()
+  const tex = new TexTemplate(texTemplateAddress)
+  const fee = 2000
+
+  console.log("👋 [tapp createPool] account", account)
+  console.log("👋 [tapp createPool] tex.templateAddress", tex.templateAddress)
+  console.log("👋 [tapp createPool] params", account)
+  const required_substates = [{ substate_id: account.address }, { substate_id: tex.templateAddress }]
+  console.log("👋 [tapp createPool] required substate", required_substates)
+
+  const tx: Transaction = builder
+    .callFunction(tex.new, [fee])
+    .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
+    .build()
+
+  console.log("👋 [tapp createPool] new coin tx", tx)
+  console.log("👋 [tapp createPool] required substate", required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+  const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
+  console.log("👋 [tapp createPool] tx resulrt", txResult)
+  console.log("👋 [tapp createPool] tx response", response)
+  if (!response) throw new Error("Failed to create coin: no response found")
+
+  const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
+  if (!upSubstates) console.warn("👋 [tapp createPool] No up susbsates found")
+  console.log("👋 [tapp createPool] Up substates: ", upSubstates)
 
   return txResult
 }
