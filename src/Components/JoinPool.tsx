@@ -1,11 +1,24 @@
-import { Box, Button, Paper, TextField, Typography } from "@mui/material"
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Typography,
+} from "@mui/material"
 import React, { useState } from "react"
 import { addLiquidity, createTex } from "../hooks/useTex"
 import { useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
+import { tokensSelector } from "../store/tokens/token.selector"
 
 export const JoinPool = () => {
   const provider = useSelector(providerSelector.selectProvider)
+  const tokensList = useSelector(tokensSelector.selectTokens)
 
   const [texTemplateAddress, setTexTemplateAddress] = useState("")
   const [firstTokenAmount, setFirstTokenAmount] = useState("0")
@@ -75,6 +88,16 @@ export const JoinPool = () => {
     setSecondTokenAddress(value)
   }
 
+  const handleChangeTokenA = (event: SelectChangeEvent) => {
+    console.info("selected token", event.target.value)
+    setFirstTokenAddress(event.target.value as string)
+  }
+
+  const handleChangeTokenB = (event: SelectChangeEvent) => {
+    console.info("selected token", event.target.value)
+    setSecondTokenAddress(event.target.value as string)
+  }
+
   return (
     <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%">
       <Paper
@@ -85,7 +108,24 @@ export const JoinPool = () => {
         }}
       >
         <Typography variant="h4">Join the pool with tokens:</Typography>
-
+        <FormControl fullWidth>
+          <InputLabel id="select-first-token">First Token</InputLabel>
+          <Select
+            labelId="select-first-token"
+            id="first-token"
+            value={firstTokenAddress}
+            label="selected-token"
+            onChange={handleChangeTokenA}
+          >
+            {tokensList.map((token) => {
+              return (
+                <MenuItem value={token.substate.resource} key={token.substate.resource}>
+                  {token.symbol} {token.substate.resource}
+                </MenuItem>
+              )
+            })}
+          </Select>
+        </FormControl>
         <TextField
           label="Token A template address"
           value={firstTokenAddress}
@@ -99,11 +139,25 @@ export const JoinPool = () => {
           helperText={firstTokenError}
           required
         />
-        <TextField
-          label="Token B template address"
-          value={secondTokenAddress}
-          onChange={handleSecondTokenAddressChange}
-        />
+        <FormControl fullWidth>
+          <InputLabel id="select-second-token">Second Token</InputLabel>
+          <Select
+            labelId="select-second-token"
+            id="second-token"
+            value={secondTokenAddress}
+            label="selected-token"
+            onChange={handleChangeTokenB}
+          >
+            {tokensList.map((token) => {
+              return (
+                <MenuItem value={token.substate.resource} key={token.substate.resource}>
+                  {token.symbol} {token.substate.resource}
+                </MenuItem>
+              )
+            })}
+          </Select>
+        </FormControl>
+        <TextField label="Token B" value={secondTokenAddress} onChange={handleSecondTokenAddressChange} />
         <TextField
           label="Token B amount"
           value={secondTokenAmount}

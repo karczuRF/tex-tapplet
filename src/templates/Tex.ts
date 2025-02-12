@@ -1,6 +1,5 @@
 import { ResourceAddress, TariFunctionDefinition, TariMethodDefinition, WorkspaceArg } from "@tari-project/tarijs"
 import { TemplateFactory } from "@tari-project/tarijs/dist/templates"
-import { Bucket } from "./types"
 
 interface NewFunction extends TariFunctionDefinition {
   functionName: "new"
@@ -9,7 +8,7 @@ interface NewFunction extends TariFunctionDefinition {
 
 interface SwapMethod extends TariMethodDefinition {
   methodName: "swap"
-  args?: [Bucket, ResourceAddress]
+  args?: [WorkspaceArg, ResourceAddress]
 }
 
 interface AddLiquidityMethod extends TariMethodDefinition {

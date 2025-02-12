@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AccountTemplate } from "@tari-project/tarijs/dist/templates/index"
 import {
-  Amount,
   buildTransactionRequest,
   ComponentAddress,
   fromWorkspace,
@@ -18,36 +16,37 @@ import { Token, TokenSubstate } from "../templates/types"
 import { CoinTemplate } from "../templates/Coin"
 import { getAcceptResultSubstates } from "@tari-project/tarijs/dist/builders/helpers/submitTransaction"
 import { substateIdToString } from "@tari-project/typescript-bindings"
+import { AccountTemplate } from "../templates/Account"
 
 export const FEE_AMOUNT = "2000"
 export const INIT_SUPPLY = "100000"
-export const FAUCET_TEMPLATE_ADDRESS = "1d51f2081c9fc77637d9c9b8be21697ffbd345a7a7f3a39abb76573ca5b61e16"
+// export const FAUCET_TEMPLATE_ADDRESS = "1d51f2081c9fc77637d9c9b8be21697ffbd345a7a7f3a39abb76573ca5b61e16"
 
-export const FIRST_TOKEN_RESOURCE_ADDRESS = "resource_902fabadddb86d50beca3d1ed3d8c0eece92767f166f816d227f1a7d"
-export const FIRST_TOKEN_COMPONENT_ADDRESS = "component_902fabadddb86d50beca3d1ed3d8c0eece92767f2b9b43034d554c34"
-export const FIRST_TOKEN_SYMBOL = "A"
+// export const FIRST_TOKEN_RESOURCE_ADDRESS = "resource_902fabadddb86d50beca3d1ed3d8c0eece92767f166f816d227f1a7d"
+// export const FIRST_TOKEN_COMPONENT_ADDRESS = "component_902fabadddb86d50beca3d1ed3d8c0eece92767f2b9b43034d554c34"
+// export const FIRST_TOKEN_SYMBOL = "A"
 
-export const SECOND_TOKEN_RESOURCE_ADDRESS = "resource_e1263a8f6fd826bb3d8482bd84a7f6eef1ddb5db2fa21b9b3c79e39a"
-export const SECOND_TOKEN_COMPONENT_ADDRESS = "component_e1263a8f6fd826bb3d8482bd84a7f6eef1ddb5db2b9b43034d554c34"
-export const SECOND_TOKEN_SYMBOL = "B"
+// export const SECOND_TOKEN_RESOURCE_ADDRESS = "resource_e1263a8f6fd826bb3d8482bd84a7f6eef1ddb5db2fa21b9b3c79e39a"
+// export const SECOND_TOKEN_COMPONENT_ADDRESS = "component_e1263a8f6fd826bb3d8482bd84a7f6eef1ddb5db2b9b43034d554c34"
+// export const SECOND_TOKEN_SYMBOL = "B"
 
-export const defaultFirstToken: Token = {
-  substate: {
-    resource: FIRST_TOKEN_RESOURCE_ADDRESS,
-    component: FIRST_TOKEN_COMPONENT_ADDRESS,
-  },
-  symbol: FIRST_TOKEN_SYMBOL,
-  balance: 0,
-}
+// export const defaultFirstToken: Token = {
+//   substate: {
+//     resource: FIRST_TOKEN_RESOURCE_ADDRESS,
+//     component: FIRST_TOKEN_COMPONENT_ADDRESS,
+//   },
+//   symbol: FIRST_TOKEN_SYMBOL,
+//   balance: 0,
+// }
 
-export const defaultSecondToken: Token = {
-  substate: {
-    resource: SECOND_TOKEN_RESOURCE_ADDRESS,
-    component: SECOND_TOKEN_COMPONENT_ADDRESS,
-  },
-  symbol: SECOND_TOKEN_SYMBOL,
-  balance: 0,
-}
+// export const defaultSecondToken: Token = {
+//   substate: {
+//     resource: SECOND_TOKEN_RESOURCE_ADDRESS,
+//     component: SECOND_TOKEN_COMPONENT_ADDRESS,
+//   },
+//   symbol: SECOND_TOKEN_SYMBOL,
+//   balance: 0,
+// }
 
 function extractNumericPart(address: string): string {
   const match = address.match(/_(\d+)$/)
@@ -115,7 +114,7 @@ export async function createCoin(
     ? {
         substate: tokenSubstate,
         symbol: symbol,
-        balance: initSupply,
+        totalSupply: initSupply,
       }
     : null
 }
@@ -155,26 +154,25 @@ export async function addLiquidity(
     const builder = new TransactionBuilder()
     const tex = new TexTemplate(texTemplateAddress)
     const accountComponent = new AccountTemplate(account.address)
-    const fee = new Amount(2000)
-    const amountA = new Amount(amountTokenA)
-    const amountB = new Amount(amountTokenB)
 
     const required_substates = [{ substate_id: account.address }, { substate_id: tex.templateAddress }]
-
     const tx = builder
-      .callMethod(accountComponent.withdraw, [resourceAddressA, amountA])
+      .callMethod(accountComponent.withdraw, [resourceAddressA, amountTokenA])
       .saveVar("tokenA")
-      .callMethod(accountComponent.withdraw, [resourceAddressB, amountB])
+      .callMethod(accountComponent.withdraw, [resourceAddressB, amountTokenB])
       .saveVar("tokenB")
       .callMethod(tex.addLiquidity, [fromWorkspace("tokenA"), fromWorkspace("tokenB")])
       .saveVar("lptoken")
       .callMethod(accountComponent.deposit, [fromWorkspace("lptoken")])
-      .callMethod(accountComponent.payFee, [fee])
+      // .callMethod(accountComponent.payFee, [2000]) DONT USE
       .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
       .build()
 
+    console.log("👋 [tapp addLiq] tx result", tx)
     const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
-    const result = await submitAndWaitForTransaction(provider, req)
+    const { response, result } = await submitAndWaitForTransaction(provider, req)
+    console.log("👋 [tapp addLiq] tx result", result)
+    console.log("👋 [tapp addLiq] tx response", response)
     return result
   } catch (error) {
     console.error(error)
@@ -191,53 +189,52 @@ export async function removeLiquidity(
   const builder = new TransactionBuilder()
   const tex = new TexTemplate(texTemplateAddress)
   const accountComponent = new AccountTemplate(account.address)
-  const amountLp = new Amount(amountLpToken)
-  const fee = new Amount(2000)
 
   const tx = builder
-    .callMethod(accountComponent.withdraw, [lpTokenResourceAddress, amountLp])
+    .callMethod(accountComponent.withdraw, [lpTokenResourceAddress, amountLpToken])
     .saveVar("lp")
     .callMethod(tex.removeLiquidity, [fromWorkspace("lp")])
     .saveVar("pool")
     .callMethod(accountComponent.deposit, [fromWorkspace("pool.0")])
     .callMethod(accountComponent.deposit, [fromWorkspace("pool.1")])
-    .callMethod(accountComponent.payFee, [fee])
+    .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
   const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
-  const result = await submitAndWaitForTransaction(provider, req)
+  const { response, result } = await submitAndWaitForTransaction(provider, req)
+  console.log("👋 [tapp remove lp] tx result", result)
+  console.log("👋 [tapp remove lp] tx response", response)
   return result
 }
 
 export async function swap(
   provider: TariProvider,
   texTemplateAddress: string,
-  inputToken: string,
-  amountInputToken: number,
-  outputToken: string
+  inputTokenAddress: string,
+  inputTokenAmount: number,
+  outputTokenAddress: string
 ) {
   const account = await provider.getAccount()
   const builder = new TransactionBuilder()
   const tex = new TexTemplate(texTemplateAddress)
   const accountComponent = new AccountTemplate(account.address)
-  const amountInput = new Amount(amountInputToken)
-  const fee = new Amount(2000)
 
   // TODO fix it
   const tx = builder
-    .callMethod(accountComponent.withdraw, [inputToken, amountInput])
+    .callMethod(accountComponent.withdraw, [inputTokenAddress, inputTokenAmount])
     .saveVar("inputToken")
-    .callMethod(tex.swap, [{ BucketId: 0 }, outputToken]) //TODO fix type error
+    .callMethod(tex.swap, [fromWorkspace("inputToken"), outputTokenAddress]) //TODO fix type error
     .saveVar("swap")
     .callMethod(accountComponent.deposit, [fromWorkspace("swap")])
-    .callMethod(accountComponent.payFee, [fee])
+    .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
   const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
-  const result = await submitAndWaitForTransaction(provider, req)
-
+  const { response, result } = await submitAndWaitForTransaction(provider, req)
+  console.log("👋 [tapp SWAP] tx result", result)
+  console.log("👋 [tapp SWAP] tx response", response)
   return result
 }
 
@@ -284,4 +281,19 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
   console.log("👋 [tapp takeFreeCoins] Up substates: ", upSubstates)
 
   return txResult
+}
+
+export async function getTexPools(provider: TariProvider, texTemplateAddress: string) {
+  const account = await provider.getAccount()
+  const builder = new TransactionBuilder()
+  const tex = new TexTemplate(texTemplateAddress)
+
+  const tx = builder.callMethod(tex.pools, []).feeTransactionPayFromComponent(account.address, FEE_AMOUNT).build()
+
+  const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+  const { response, result } = await submitAndWaitForTransaction(provider, req)
+  console.log("👋 [tapp remove lp] tx result", result)
+  console.log("👋 [tapp remove lp] tx response", response)
+  return result
 }

@@ -7,6 +7,8 @@ import { RootState } from "../store"
 
 import { ErrorSource } from "../error/error.types"
 import { InitAccountRequestPayload, SetAccountRequestPayload } from "./account.types"
+import { tokenActions } from "../tokens/token.slice"
+import { Token } from "../../templates/types"
 
 export const initializeAction = () => ({
   actionCreator: accountActions.initializeRequest,
@@ -38,6 +40,20 @@ export const initializeAction = () => ({
             },
             public_key: acc.public_key,
           },
+        })
+      )
+      const updatedTokens: Token[] = acc.resources.map((t) => ({
+        substate: {
+          resource: t.resource_address,
+          component: "",
+        },
+        symbol: t.token_symbol,
+        totalSupply: t.balance,
+      }))
+      console.log("ACCOUNT ACTION UPDATED TOKENS", updatedTokens)
+      listenerApi.dispatch(
+        tokenActions.setTokenSuccess({
+          tokens: updatedTokens,
         })
       )
     } catch (error) {

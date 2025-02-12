@@ -15,5 +15,5 @@ export type TokenSubstate = {
 export type Token = {
   substate: TokenSubstate
   symbol: string
-  balance: number
+  totalSupply: number
 }

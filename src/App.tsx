@@ -6,6 +6,7 @@ import { Tokens } from "./Components/Tokens"
 import { providerActions } from "./store/provider/provider.slice"
 import { accountActions } from "./store/account/account.slice"
 import { useDispatch } from "react-redux"
+import { tokenActions } from "./store/tokens/token.slice"
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -41,6 +42,7 @@ function App() {
   useEffect(() => {
     dispatch(providerActions.initializeRequest({}))
     dispatch(accountActions.initializeRequest({}))
+    dispatch(tokenActions.initializeRequest({}))
   }, [])
 
   const [value, setValue] = useState(0)
@@ -88,7 +90,7 @@ function App() {
           <JoinPool />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
-          <ExitPool onSubmit={handlePlaceholder} callback={handlePlaceholder} />
+          <ExitPool />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2}>
           <Swap handleSwap={handlePlaceholder} callback={handlePlaceholder} />

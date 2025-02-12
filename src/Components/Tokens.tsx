@@ -1,10 +1,11 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material"
 import React, { useState } from "react"
 import { createCoin, takeFreeCoins } from "../hooks/useTex"
-import { Token } from "../templates/types"
 import { Account } from "./Account"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
+import { tokenActions } from "../store/tokens/token.slice"
+import { tokensSelector } from "../store/tokens/token.selector"
 
 export const Tokens = () => {
   const [tokenInitSupply, setTokenInitSupply] = useState("0")
@@ -13,8 +14,9 @@ export const Tokens = () => {
   const [tokenAddress, setTokenAddress] = useState("")
   const [tokenSymbol, setTokenSymbol] = useState("")
   const [tokenError, setTokenError] = useState("")
-  const [tokensList, setTokensList] = useState<Token[]>()
   const provider = useSelector(providerSelector.selectProvider)
+  const tokensList = useSelector(tokensSelector.selectTokens)
+  const dispatch = useDispatch()
 
   const isValidNumberInput = (input: string) => {
     return Number.isInteger(Number(input)) && input !== ""
@@ -30,13 +32,9 @@ export const Tokens = () => {
       throw new Error("Please enter valid token values")
     }
     console.log("provider tapplet", provider)
-    const newCoin = await createCoin(provider, tokenTemplateAddress, Number(tokenInitSupply), tokenSymbol)
-    if (!newCoin) return
-    if (!tokensList) {
-      setTokensList([newCoin])
-      return
-    }
-    setTokensList([...tokensList, newCoin])
+    const token = await createCoin(provider, tokenTemplateAddress, Number(tokenInitSupply), tokenSymbol)
+    if (!token) return
+    dispatch(tokenActions.setTokenRequest({ token }))
   }
 
   const handleTokenInitSupplyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +140,7 @@ export const Tokens = () => {
         >
           {tokensList.map((token, index) => (
             <Typography key={index} variant="h6">
-              {index}. {token.symbol} {token.balance} {token.substate.component}
+              {index}. {token.symbol} {token.totalSupply}
             </Typography>
           ))}
         </Paper>
