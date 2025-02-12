@@ -1,31 +1,11 @@
 import "./App.css"
 import { AppBar, Box, Tab, Tabs } from "@mui/material"
 import { ExitPool, JoinPool, Swap } from "./Components"
-import {
-  TariPermissions,
-  TariUniverseProvider,
-  TariUniverseProviderParameters,
-  permissions as walletPermissions,
-} from "@tari-project/tarijs"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { Tokens } from "./Components/Tokens"
 import { providerActions } from "./store/provider/provider.slice"
 import { accountActions } from "./store/account/account.slice"
 import { useDispatch } from "react-redux"
-
-const { TariPermissionAccountInfo, TariPermissionKeyList, TariPermissionSubstatesRead, TariPermissionTransactionSend } =
-  walletPermissions
-
-const permissions = new TariPermissions()
-permissions.addPermission(new TariPermissionKeyList())
-permissions.addPermission(new TariPermissionAccountInfo())
-permissions.addPermission(new TariPermissionTransactionSend())
-permissions.addPermission(new TariPermissionSubstatesRead())
-const optionalPermissions = new TariPermissions()
-const params: TariUniverseProviderParameters = {
-  permissions: permissions,
-  optionalPermissions,
-}
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -57,8 +37,6 @@ function a11yProps(index: number) {
 }
 
 function App() {
-  // const classes = useStyles()
-  const provider = useRef<TariUniverseProvider>(new TariUniverseProvider(params))
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(providerActions.initializeRequest({}))
@@ -107,7 +85,7 @@ function App() {
         }}
       >
         <CustomTabPanel value={value} index={0}>
-          <JoinPool onSubmit={handlePlaceholder} callback={handlePlaceholder} provider={provider.current} />
+          <JoinPool />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
           <ExitPool onSubmit={handlePlaceholder} callback={handlePlaceholder} />

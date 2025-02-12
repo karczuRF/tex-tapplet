@@ -1,15 +1,10 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material"
 import React, { useState } from "react"
 import { createCoin, takeFreeCoins } from "../hooks/useTex"
-import { TariUniverseProvider } from "@tari-project/tarijs"
 import { Token } from "../templates/types"
 import { Account } from "./Account"
 import { useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
-
-export type InputTokensFormProps = {
-  provider: TariUniverseProvider
-}
 
 export const Tokens = () => {
   const [tokenInitSupply, setTokenInitSupply] = useState("0")

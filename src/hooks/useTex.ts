@@ -126,7 +126,10 @@ export async function createTex(provider: TariProvider, texTemplateAddress: stri
   const tex = new TexTemplate(texTemplateAddress)
   const swapFeeAmount = 10 //`fee` represents a percentage, so it must be between 0 and 100
 
-  const tx: Transaction = builder.callFunction(tex.new, [swapFeeAmount]).build()
+  const tx: Transaction = builder
+    .callFunction(tex.new, [swapFeeAmount])
+    .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
+    .build()
 
   const required_substates = [{ substate_id: account.address }]
   const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
@@ -167,6 +170,7 @@ export async function addLiquidity(
       .saveVar("lptoken")
       .callMethod(accountComponent.deposit, [fromWorkspace("lptoken")])
       .callMethod(accountComponent.payFee, [fee])
+      .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
       .build()
 
     const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
@@ -278,38 +282,6 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
   if (!upSubstates) console.warn("👋 [tapp takeFreeCoins] No up susbsates found")
   console.log("👋 [tapp takeFreeCoins] Up substates: ", upSubstates)
-
-  return txResult
-}
-
-export async function createPool(provider: TariUniverseProvider, texTemplateAddress: string) {
-  const account = await provider.getAccount()
-  const builder = new TransactionBuilder()
-  const tex = new TexTemplate(texTemplateAddress)
-  const fee = 2000
-
-  console.log("👋 [tapp createPool] account", account)
-  console.log("👋 [tapp createPool] tex.templateAddress", tex.templateAddress)
-  console.log("👋 [tapp createPool] params", account)
-  const required_substates = [{ substate_id: account.address }, { substate_id: tex.templateAddress }]
-  console.log("👋 [tapp createPool] required substate", required_substates)
-
-  const tx: Transaction = builder
-    .callFunction(tex.new, [fee])
-    .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
-    .build()
-
-  console.log("👋 [tapp createPool] new coin tx", tx)
-  console.log("👋 [tapp createPool] required substate", required_substates)
-  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
-  const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
-  console.log("👋 [tapp createPool] tx resulrt", txResult)
-  console.log("👋 [tapp createPool] tx response", response)
-  if (!response) throw new Error("Failed to create coin: no response found")
-
-  const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
-  if (!upSubstates) console.warn("👋 [tapp createPool] No up susbsates found")
-  console.log("👋 [tapp createPool] Up substates: ", upSubstates)
 
   return txResult
 }
