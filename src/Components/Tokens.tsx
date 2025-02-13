@@ -1,7 +1,6 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material"
 import React, { useState } from "react"
 import { createCoin, takeFreeCoins } from "../hooks/useTex"
-import { Account } from "./Account"
 import { useDispatch, useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
 import { tokenActions } from "../store/tokens/token.slice"
@@ -80,8 +79,7 @@ export const Tokens = () => {
   }
 
   return (
-    <Box display="grid" justifyContent="center" alignItems="center" height="100%" width="100%" gap="20px">
-      <Account />
+    <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%" gap="20px">
       <Paper
         style={{
           display: "grid",
@@ -89,7 +87,7 @@ export const Tokens = () => {
           padding: "20px",
         }}
       >
-        <Typography variant="h4">Claim tokens</Typography>
+        <Typography variant="h4">Claim free tokens</Typography>
         <TextField label="Token address" value={tokenAddress} onChange={handleTokenAddressChange} />
         <TextField
           label="Token amount"

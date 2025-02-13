@@ -1,12 +1,13 @@
 import "./App.css"
 import { AppBar, Box, Tab, Tabs } from "@mui/material"
-import { ExitPool, JoinPool, Swap } from "./Components"
 import { useEffect, useState } from "react"
 import { Tokens } from "./Components/Tokens"
 import { providerActions } from "./store/provider/provider.slice"
 import { accountActions } from "./store/account/account.slice"
 import { useDispatch } from "react-redux"
 import { tokenActions } from "./store/tokens/token.slice"
+import { PoolDashboard } from "./Components/PoolDashboard"
+import { Account } from "./Components/Account"
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -50,7 +51,6 @@ function App() {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue)
   }
-  const handlePlaceholder = () => {}
 
   return (
     <Box
@@ -70,10 +70,9 @@ function App() {
           variant="fullWidth"
           aria-label="tapplet-tabs"
         >
-          <Tab label="Join Pool" {...a11yProps(0)} />
-          <Tab label="Exit Pool" {...a11yProps(1)} />
-          <Tab label="Swap" {...a11yProps(2)} />
-          <Tab label="Tokens" {...a11yProps(3)} />
+          <Tab label="Account" {...a11yProps(0)} />
+          <Tab label="Tokens" {...a11yProps(1)} />
+          <Tab label="Liquidity Pools" {...a11yProps(2)} />
         </Tabs>
       </AppBar>
       <Box
@@ -87,16 +86,13 @@ function App() {
         }}
       >
         <CustomTabPanel value={value} index={0}>
-          <JoinPool />
+          <Account />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
-          <ExitPool />
+          <Tokens />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2}>
-          <Swap handleSwap={handlePlaceholder} callback={handlePlaceholder} />
-        </CustomTabPanel>
-        <CustomTabPanel value={value} index={3}>
-          <Tokens />
+          <PoolDashboard />
         </CustomTabPanel>
       </Box>
     </Box>

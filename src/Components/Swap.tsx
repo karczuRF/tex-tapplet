@@ -18,12 +18,7 @@ import { useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
 import { tokensSelector } from "../store/tokens/token.selector"
 
-export type SwapProps = {
-  handleSwap: (inputToken: string, tokenAmount: number, outputToken: string) => void
-  callback: () => void
-}
-
-export const Swap = ({ handleSwap, callback }: SwapProps) => {
+export const Swap = () => {
   const provider = useSelector(providerSelector.selectProvider)
   const tokensList = useSelector(tokensSelector.selectTokens) //TODO ofc not all tokens list but only from LP
 
@@ -54,8 +49,6 @@ export const Swap = ({ handleSwap, callback }: SwapProps) => {
     if (!provider) return
     const inputToken = firstToSecond ? firstTokenAddress : secondTokenAddress
     const outputToken = firstToSecond ? secondTokenAddress : firstTokenAddress
-    await handleSwap(inputToken, Number(tokenAmount), outputToken)
-    callback()
     await swap(provider, TEX_COMPONENT_ADDRESS, inputToken, Number(tokenAmount), outputToken)
   }
 
@@ -70,7 +63,7 @@ export const Swap = ({ handleSwap, callback }: SwapProps) => {
   }
 
   return (
-    <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+    <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%">
       <Paper
         style={{
           display: "grid",

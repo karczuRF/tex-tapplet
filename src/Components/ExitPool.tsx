@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   FormControl,
   InputLabel,
@@ -66,41 +67,43 @@ export const ExitPool = () => {
   // }, [account, handleGetTexPools, provider])
 
   return (
-    <Paper
-      style={{
-        display: "grid",
-        gridRowGap: "20px",
-        padding: "20px",
-      }}
-    >
-      <Typography variant="h4">Exit the pool with LP tokens </Typography>
+    <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%">
+      <Paper
+        style={{
+          display: "grid",
+          gridRowGap: "20px",
+          padding: "20px",
+        }}
+      >
+        <Typography variant="h4">Exit the pool with LP tokens </Typography>
 
-      <TextField
-        label="LP token amount"
-        value={lpTokenAmount}
-        onChange={handleLpTokenAmountChange}
-        error={!!lpTokenError}
-        helperText={lpTokenError}
-        required
-      />
-      <Typography variant="h4">Exit your LP</Typography>
-      <FormControl fullWidth>
-        <InputLabel id="select-lp">LP</InputLabel>
-        <Select labelId="select-lp" id="lp" value={lpAddress} label="selected-token" onChange={handleChangeLP}>
-          {tokensList
-            .filter((lp) => lp.symbol === "LP")
-            .map((token) => {
-              return (
-                <MenuItem value={token.substate.resource} key={token.substate.resource}>
-                  {token.symbol} {token.substate.resource}
-                </MenuItem>
-              )
-            })}
-        </Select>
-      </FormControl>
-      <Button onClick={handleSubmit} variant={"contained"}>
-        Exit pool
-      </Button>
-    </Paper>
+        <TextField
+          label="LP token amount"
+          value={lpTokenAmount}
+          onChange={handleLpTokenAmountChange}
+          error={!!lpTokenError}
+          helperText={lpTokenError}
+          required
+        />
+        <Typography variant="h4">Exit your LP</Typography>
+        <FormControl fullWidth>
+          <InputLabel id="select-lp">LP</InputLabel>
+          <Select labelId="select-lp" id="lp" value={lpAddress} label="selected-token" onChange={handleChangeLP}>
+            {tokensList
+              .filter((lp) => lp.symbol === "LP")
+              .map((token) => {
+                return (
+                  <MenuItem value={token.substate.resource} key={token.substate.resource}>
+                    {token.symbol} {token.substate.resource}
+                  </MenuItem>
+                )
+              })}
+          </Select>
+        </FormControl>
+        <Button onClick={handleSubmit} variant={"contained"}>
+          Exit pool
+        </Button>
+      </Paper>
+    </Box>
   )
 }
