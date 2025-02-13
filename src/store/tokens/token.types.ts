@@ -1,7 +1,7 @@
 import { Token } from "../../templates/types"
 
 export type TokenStoreState = {
-  isInitialized: boolean
+  texAddress?: string
   tokens: Token[]
 }
 
@@ -13,7 +13,6 @@ export type InitTokenFailurePayload = {
 export type InitTokenSuccessPayload = {
   tokens: Token[]
 }
-
 export type SetTokenRequestPayload = {
   token: Token
 }
@@ -22,4 +21,10 @@ export type SetTokenSuccessPayload = {
 }
 export type SetTokenFailurePayload = {
   errorMsg: string
+}
+export type SetTexRequestPayload = {
+  texTemplateAddress: string
+}
+export type SetTexSuccessPayload = {
+  texAddress: string
 }

@@ -8,12 +8,13 @@ export type InitTokensResponse = {
 }
 
 export type TokenSubstate = {
-  resource: string
-  component: string
+  resource?: string
+  component?: string
 }
 
 export type Token = {
   substate: TokenSubstate
   symbol: string
   totalSupply: number
+  balance: number
 }

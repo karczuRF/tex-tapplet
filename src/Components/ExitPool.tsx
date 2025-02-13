@@ -10,11 +10,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material"
-import React, { useState } from "react"
-import { removeLiquidity } from "../hooks/useTex"
+import React, { useCallback, useState } from "react"
+import { getTexPools, removeLiquidity } from "../hooks/useTex"
 import { providerSelector } from "../store/provider/provider.selector"
 import { useSelector } from "react-redux"
 import { TEX_COMPONENT_ADDRESS } from "../constants"
+import { accountSelector } from "../store/account/account.selector"
+import { shortenSubstateAddress } from "../types/tapplet"
 import { tokensSelector } from "../store/tokens/token.selector"
 
 export type InputTokensFormProps = {
@@ -24,7 +26,8 @@ export type InputTokensFormProps = {
 
 export const ExitPool = () => {
   const provider = useSelector(providerSelector.selectProvider)
-  const tokensList = useSelector(tokensSelector.selectTokens)
+  const tokens = useSelector(accountSelector.selectAccountTokens)
+  const tex = useSelector(tokensSelector.selectTex)
 
   const [lpTokenAmount, setLpTokenAmount] = useState("0")
   const [lpTokenError, setLpTokenError] = useState("")
@@ -57,10 +60,11 @@ export const ExitPool = () => {
   const handleChangeLP = (event: SelectChangeEvent) => {
     setLpAddress(event.target.value)
   }
-  // const handleGetTexPools = useCallback(async () => {
-  //   if (!provider) return
-  //   await getTexPools(provider, TEX_COMPONENT_ADDRESS)
-  // }, [provider])
+  const handleGetTexPools = useCallback(async () => {
+    if (!provider || !tex) return
+    const res = await getTexPools(provider, tex) //TODO fix infinite pending tx
+    console.log("refresh pools done", res)
+  }, [provider, tex])
 
   // useEffect(() => {
   //   handleGetTexPools()
@@ -73,10 +77,27 @@ export const ExitPool = () => {
           display: "grid",
           gridRowGap: "20px",
           padding: "20px",
+          width: "100%",
+          height: "100%",
         }}
       >
         <Typography variant="h4">Exit the pool with LP tokens </Typography>
 
+        <Typography variant="h4">Exit your LP</Typography>
+        <FormControl fullWidth>
+          <InputLabel id="select-lp">LP</InputLabel>
+          <Select labelId="select-lp" id="lp" value={lpAddress} label="selected-token" onChange={handleChangeLP}>
+            {tokens
+              .filter((lp) => lp.symbol === "LP")
+              .map((token) => {
+                return (
+                  <MenuItem value={token.substate.resource} key={token.substate.resource}>
+                    {token.symbol} {shortenSubstateAddress(token.substate.resource ?? "")}
+                  </MenuItem>
+                )
+              })}
+          </Select>
+        </FormControl>
         <TextField
           label="LP token amount"
           value={lpTokenAmount}
@@ -85,23 +106,11 @@ export const ExitPool = () => {
           helperText={lpTokenError}
           required
         />
-        <Typography variant="h4">Exit your LP</Typography>
-        <FormControl fullWidth>
-          <InputLabel id="select-lp">LP</InputLabel>
-          <Select labelId="select-lp" id="lp" value={lpAddress} label="selected-token" onChange={handleChangeLP}>
-            {tokensList
-              .filter((lp) => lp.symbol === "LP")
-              .map((token) => {
-                return (
-                  <MenuItem value={token.substate.resource} key={token.substate.resource}>
-                    {token.symbol} {token.substate.resource}
-                  </MenuItem>
-                )
-              })}
-          </Select>
-        </FormControl>
         <Button onClick={handleSubmit} variant={"contained"}>
           Exit pool
+        </Button>
+        <Button onClick={handleGetTexPools} variant={"contained"}>
+          Refresh pools list
         </Button>
       </Paper>
     </Box>

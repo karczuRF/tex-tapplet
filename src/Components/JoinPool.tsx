@@ -11,14 +11,19 @@ import {
   Typography,
 } from "@mui/material"
 import React, { useState } from "react"
-import { addLiquidity, createTex } from "../hooks/useTex"
-import { useSelector } from "react-redux"
+import { addLiquidity } from "../hooks/useTex"
+import { useDispatch, useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
 import { tokensSelector } from "../store/tokens/token.selector"
+import { tokenActions } from "../store/tokens/token.slice"
+import { shortenSubstateAddress } from "../types/tapplet"
+import { accountSelector } from "../store/account/account.selector"
 
 export const JoinPool = () => {
   const provider = useSelector(providerSelector.selectProvider)
-  const tokensList = useSelector(tokensSelector.selectTokens)
+  const tokens = useSelector(accountSelector.selectAccountTokens)
+  const tex = useSelector(tokensSelector.selectTex)
+  const dispatch = useDispatch()
 
   const [texTemplateAddress, setTexTemplateAddress] = useState("")
   const [firstTokenAmount, setFirstTokenAmount] = useState("0")
@@ -34,13 +39,13 @@ export const JoinPool = () => {
 
   const handleSubmit = async () => {
     console.log("provider tapplet", provider)
-    if (!provider) return
+    if (!provider || !tex) return
     if (!isValidInput(firstTokenAmount) || !isValidInput(secondTokenAmount)) {
       throw new Error("Please enter valid integer values")
     }
     addLiquidity(
       provider,
-      texTemplateAddress,
+      tex,
       firstTokenAddress,
       secondTokenAddress,
       Number(firstTokenAmount),
@@ -49,8 +54,7 @@ export const JoinPool = () => {
   }
   const onClickCreate = async () => {
     console.log("tapplet create tex", texTemplateAddress)
-    if (!provider) return
-    createTex(provider, texTemplateAddress)
+    dispatch(tokenActions.setTexRequest({ texTemplateAddress }))
   }
 
   const handleFirstTokenAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,16 +82,6 @@ export const JoinPool = () => {
     setTexTemplateAddress(value)
   }
 
-  const handleFirstTokenAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value
-    setFirstTokenAddress(value)
-  }
-
-  const handleSecondTokenAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value
-    setSecondTokenAddress(value)
-  }
-
   const handleChangeTokenA = (event: SelectChangeEvent) => {
     console.info("selected token", event.target.value)
     setFirstTokenAddress(event.target.value as string)
@@ -100,81 +94,95 @@ export const JoinPool = () => {
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%">
-      <Paper
-        style={{
-          display: "grid",
-          gridRowGap: "20px",
-          padding: "20px",
-        }}
-      >
-        <Typography variant="h4">Join the pool with tokens:</Typography>
-        <FormControl fullWidth>
-          <InputLabel id="select-first-token">First Token</InputLabel>
-          <Select
-            labelId="select-first-token"
-            id="first-token"
-            value={firstTokenAddress}
-            label="selected-token"
-            onChange={handleChangeTokenA}
-          >
-            {tokensList.map((token) => {
-              return (
-                <MenuItem value={token.substate.resource} key={token.substate.resource}>
-                  {token.symbol} {token.substate.resource}
-                </MenuItem>
-              )
-            })}
-          </Select>
-        </FormControl>
-        <TextField
-          label="Token A template address"
-          value={firstTokenAddress}
-          onChange={handleFirstTokenAddressChange}
-        />
-        <TextField
-          label="Token A amount"
-          value={firstTokenAmount}
-          onChange={handleFirstTokenAmountChange}
-          error={!!firstTokenError}
-          helperText={firstTokenError}
-          required
-        />
-        <FormControl fullWidth>
-          <InputLabel id="select-second-token">Second Token</InputLabel>
-          <Select
-            labelId="select-second-token"
-            id="second-token"
-            value={secondTokenAddress}
-            label="selected-token"
-            onChange={handleChangeTokenB}
-          >
-            {tokensList.map((token) => {
-              return (
-                <MenuItem value={token.substate.resource} key={token.substate.resource}>
-                  {token.symbol} {token.substate.resource}
-                </MenuItem>
-              )
-            })}
-          </Select>
-        </FormControl>
-        <TextField label="Token B" value={secondTokenAddress} onChange={handleSecondTokenAddressChange} />
-        <TextField
-          label="Token B amount"
-          value={secondTokenAmount}
-          onChange={handleSecondTokenAmountChange}
-          error={!!secondTokenError}
-          helperText={secondTokenError}
-          required
-        />
-        <Button onClick={handleSubmit} variant={"contained"}>
-          Submit
-        </Button>
-
-        <TextField label="Tex template address" value={texTemplateAddress} onChange={handleTexTemplateAddressChange} />
-        <Button onClick={onClickCreate} variant={"contained"}>
-          {`Create Tex`}
-        </Button>
-      </Paper>
+      {!tex ? (
+        <Paper
+          style={{
+            display: "grid",
+            gridRowGap: "20px",
+            padding: "20px",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Typography variant="h4">No Tex found. Create new one. {tex}</Typography>
+          <TextField
+            label="Tex template address"
+            value={texTemplateAddress}
+            onChange={handleTexTemplateAddressChange}
+          />
+          <Button onClick={onClickCreate} variant={"contained"}>
+            {`Create Tex`}
+          </Button>
+        </Paper>
+      ) : (
+        <Paper
+          style={{
+            display: "grid",
+            gridRowGap: "20px",
+            padding: "20px",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Typography variant="h6">TEX: {shortenSubstateAddress(tex)}</Typography>
+          <Typography variant="h4">Join the pool with tokens</Typography>
+          <FormControl fullWidth>
+            <InputLabel id="select-first-token">First Token</InputLabel>
+            <Select
+              labelId="select-first-token"
+              id="first-token"
+              value={firstTokenAddress}
+              label="selected-token"
+              onChange={handleChangeTokenA}
+            >
+              {tokens.map((token) => {
+                return (
+                  <MenuItem value={token.substate.resource} key={token.substate.resource}>
+                    {token.symbol} {token.substate.resource}
+                  </MenuItem>
+                )
+              })}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Token A amount"
+            value={firstTokenAmount}
+            onChange={handleFirstTokenAmountChange}
+            error={!!firstTokenError}
+            helperText={firstTokenError}
+            required
+          />
+          <FormControl fullWidth>
+            <InputLabel id="select-second-token">Second Token</InputLabel>
+            <Select
+              labelId="select-second-token"
+              id="second-token"
+              value={secondTokenAddress}
+              label="selected-token"
+              onChange={handleChangeTokenB}
+            >
+              {tokens.map((token) => {
+                return (
+                  <MenuItem value={token.substate.resource} key={token.substate.resource}>
+                    {token.symbol} {token.substate.resource}
+                  </MenuItem>
+                )
+              })}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Token B amount"
+            value={secondTokenAmount}
+            onChange={handleSecondTokenAmountChange}
+            error={!!secondTokenError}
+            helperText={secondTokenError}
+            required
+          />
+          <Button onClick={handleSubmit} variant={"contained"}>
+            Submit
+          </Button>
+        </Paper>
+      )}
     </Box>
   )
 }

@@ -12,16 +12,17 @@ import {
   Typography,
 } from "@mui/material"
 import React, { useState } from "react"
-import { TEX_COMPONENT_ADDRESS } from "../constants"
 import { swap } from "../hooks/useTex"
 import { useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
+import { accountSelector } from "../store/account/account.selector"
 import { tokensSelector } from "../store/tokens/token.selector"
 
 export const Swap = () => {
   const provider = useSelector(providerSelector.selectProvider)
-  const tokensList = useSelector(tokensSelector.selectTokens) //TODO ofc not all tokens list but only from LP
-
+  //TODO ofc not all tokens list but only from LP
+  const tokens = useSelector(accountSelector.selectAccountTokens)
+  const tex = useSelector(tokensSelector.selectTex)
   const [tokenAmount, setTokenAmount] = useState("0")
   const [tokenAmountError, setTokenAmountError] = useState("")
   const [firstToSecond, setFirstToSecond] = useState(true)
@@ -46,10 +47,10 @@ export const Swap = () => {
     if (!isValidInput(tokenAmount)) {
       throw new Error("Please enter valid integer values")
     }
-    if (!provider) return
+    if (!provider || !tex) return
     const inputToken = firstToSecond ? firstTokenAddress : secondTokenAddress
     const outputToken = firstToSecond ? secondTokenAddress : firstTokenAddress
-    await swap(provider, TEX_COMPONENT_ADDRESS, inputToken, Number(tokenAmount), outputToken)
+    await swap(provider, tex, inputToken, Number(tokenAmount), outputToken)
   }
 
   const handleFirstTokenAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,9 +70,11 @@ export const Swap = () => {
           display: "grid",
           gridRowGap: "20px",
           padding: "20px",
+          width: "100%",
+          height: "100%",
         }}
       >
-        <Typography variant="h4"> Swap tokens: </Typography>
+        <Typography variant="h4"> Swap tokens </Typography>
         <FormControl fullWidth>
           <InputLabel id="select-first-token">First Token</InputLabel>
           <Select
@@ -81,7 +84,7 @@ export const Swap = () => {
             label="selected-token"
             onChange={handleChangeTokenA}
           >
-            {tokensList.map((token) => {
+            {tokens.map((token) => {
               return (
                 <MenuItem value={token.substate.resource} key={token.substate.resource}>
                   {token.symbol} {token.substate.resource}
@@ -100,7 +103,7 @@ export const Swap = () => {
             label="selected-token"
             onChange={handleChangeTokenB}
           >
-            {tokensList.map((token) => {
+            {tokens.map((token) => {
               return (
                 <MenuItem value={token.substate.resource} key={token.substate.resource}>
                   {token.symbol} {token.substate.resource}

@@ -2,22 +2,28 @@ import { useSelector } from "react-redux"
 import { accountSelector } from "../store/account/account.selector"
 import { Box, Paper, Stack, Typography } from "@mui/material"
 import { substateIdToString } from "@tari-project/typescript-bindings"
-import { tokensSelector } from "../store/tokens/token.selector"
 
-// TODO this component is just tmp to show and control provider/account
 export const Account = () => {
   const currentAccount = useSelector(accountSelector.selectAccount)
-  const tokens = useSelector(tokensSelector.selectTokens)
+  const tokens = useSelector(accountSelector.selectAccountTokens)
   console.log("[TAPP][ACCOUNT] a ", currentAccount)
   const accountAddress = substateIdToString(currentAccount?.account.address ?? null)
   console.log("[TAPP][ACCOUNT] c", accountAddress)
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box
+      display="grid"
+      gridTemplateRows={"repeat(2, 1fr)"}
+      gap={1}
+      justifyContent="center"
+      alignItems="center"
+      height="100%"
+      width="100%"
+    >
       {currentAccount != null ? (
         <Paper
           style={{
             display: "grid",
-            gridRowGap: "20px",
+            gridRowGap: "10px",
             padding: "20px",
           }}
         >
@@ -53,7 +59,7 @@ export const Account = () => {
             <Typography
               variant="caption"
               textAlign="left"
-            >{`${key} Symbol: ${token.symbol} total supply: ${token.totalSupply} address: ${token.substate.resource} `}</Typography>
+            >{`${key} Symbol: ${token.symbol} balance: ${token.balance} address: ${token.substate.resource} `}</Typography>
           </Stack>
         ))}
       </Paper>

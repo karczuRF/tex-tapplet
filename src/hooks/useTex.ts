@@ -115,11 +115,12 @@ export async function createCoin(
         substate: tokenSubstate,
         symbol: symbol,
         totalSupply: initSupply,
+        balance: 0,
       }
     : null
 }
 
-export async function createTex(provider: TariProvider, texTemplateAddress: string) {
+export async function createTex(provider: TariProvider, texTemplateAddress: string): Promise<string> {
   const account = await provider.getAccount()
   const builder = new TransactionBuilder()
   const tex = new TexTemplate(texTemplateAddress)
@@ -137,8 +138,9 @@ export async function createTex(provider: TariProvider, texTemplateAddress: stri
 
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
   if (!upSubstates) throw new Error("No up substates found")
-  console.log("Up substates: ", upSubstates)
-  return txResult.status
+  const tst = upSubstates.find((s) => substateIdToString(s[0]).startsWith("component_"))[0]
+  console.log("Up substates: ", tst, upSubstates)
+  return upSubstates.find((s) => substateIdToString(s[0]).startsWith("component_"))[0]
 }
 
 export async function addLiquidity(
@@ -210,14 +212,14 @@ export async function removeLiquidity(
 
 export async function swap(
   provider: TariProvider,
-  texTemplateAddress: string,
+  texComponentAddress: string,
   inputTokenAddress: string,
   inputTokenAmount: number,
   outputTokenAddress: string
 ) {
   const account = await provider.getAccount()
   const builder = new TransactionBuilder()
-  const tex = new TexTemplate(texTemplateAddress)
+  const tex = new TexTemplate(texComponentAddress)
   const accountComponent = new AccountTemplate(account.address)
 
   // TODO fix it
@@ -230,7 +232,7 @@ export async function swap(
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
 
-  const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
+  const required_substates = [{ substate_id: account.address }, { substate_id: texComponentAddress }]
   const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
   const { response, result } = await submitAndWaitForTransaction(provider, req)
   console.log("👋 [tapp SWAP] tx result", result)

@@ -7,7 +7,6 @@ import { RootState } from "../store"
 
 import { ErrorSource } from "../error/error.types"
 import { InitAccountRequestPayload, SetAccountRequestPayload } from "./account.types"
-import { tokenActions } from "../tokens/token.slice"
 import { Token } from "../../templates/types"
 
 export const initializeAction = () => ({
@@ -28,6 +27,15 @@ export const initializeAction = () => ({
       }
       console.log("[TEX][STORE] GET ACC")
       const acc = await provider.getAccount()
+      const accountTokens: Token[] = acc.resources.map((t) => ({
+        substate: {
+          resource: t.resource_address,
+          component: "",
+        },
+        symbol: t.token_symbol,
+        totalSupply: t.balance, //TODO fetch totalsupply
+        balance: t.balance,
+      }))
       console.log("[TEX][STORE] GET ACC OK", acc)
       listenerApi.dispatch(
         accountActions.setAccountSuccess({
@@ -40,22 +48,15 @@ export const initializeAction = () => ({
             },
             public_key: acc.public_key,
           },
+          tokens: accountTokens,
         })
       )
-      const updatedTokens: Token[] = acc.resources.map((t) => ({
-        substate: {
-          resource: t.resource_address,
-          component: "",
-        },
-        symbol: t.token_symbol,
-        totalSupply: t.balance,
-      }))
-      console.log("ACCOUNT ACTION UPDATED TOKENS", updatedTokens)
-      listenerApi.dispatch(
-        tokenActions.setTokenSuccess({
-          tokens: updatedTokens,
-        })
-      )
+      // console.log("ACCOUNT ACTION UPDATED TOKENS", updatedTokens)
+      // listenerApi.dispatch(
+      //   tokenActions.setTokenSuccess({
+      //     tokens: updatedTokens,
+      //   })
+      // )
     } catch (error) {
       listenerApi.dispatch(accountActions.initializeFailure({ errorMsg: error as string }))
     }
@@ -89,6 +90,15 @@ export const setAccountAction = () => ({
       //   name_or_address: { Name: action.payload.accountName },
       // })
       const acc = await provider.getAccount()
+      const accountTokens: Token[] = acc.resources.map((t) => ({
+        substate: {
+          resource: t.resource_address,
+          component: "",
+        },
+        symbol: t.token_symbol,
+        totalSupply: t.balance, //TODO fetch totalsupply
+        balance: t.balance,
+      }))
 
       listenerApi.dispatch(
         accountActions.setAccountSuccess({
@@ -101,6 +111,7 @@ export const setAccountAction = () => ({
             },
             public_key: acc.public_key,
           },
+          tokens: accountTokens,
         })
       )
     } catch (error) {

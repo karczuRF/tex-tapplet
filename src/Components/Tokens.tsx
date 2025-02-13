@@ -79,12 +79,22 @@ export const Tokens = () => {
   }
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%" gap="20px">
+    <Box
+      display="grid"
+      gridTemplateColumns={"repeat(3, 1fr)"}
+      gap={7}
+      justifyContent="center"
+      alignItems="center"
+      height="100%"
+      width="100%"
+    >
       <Paper
         style={{
           display: "grid",
           gridRowGap: "20px",
           padding: "20px",
+          width: "100%",
+          height: "100%",
         }}
       >
         <Typography variant="h4">Claim free tokens</Typography>
@@ -106,6 +116,8 @@ export const Tokens = () => {
           display: "grid",
           gridRowGap: "20px",
           padding: "20px",
+          width: "100%",
+          height: "100%",
         }}
       >
         <Typography variant="h4">Create new token</Typography>
@@ -133,9 +145,11 @@ export const Tokens = () => {
             display: "grid",
             gridRowGap: "20px",
             padding: "20px",
-            maxWidth: "50%",
+            width: "100%",
+            height: "100%",
           }}
         >
+          <Typography variant="h4">Created tokens</Typography>
           {tokensList.map((token, index) => (
             <Typography key={index} variant="h6">
               {index}. {token.symbol} {token.totalSupply}
@@ -148,7 +162,8 @@ export const Tokens = () => {
             display: "grid",
             gridRowGap: "20px",
             padding: "20px",
-            maxWidth: "100%",
+            width: "100%",
+            height: "100%",
           }}
         >
           <Typography variant="h4">No tokens</Typography>

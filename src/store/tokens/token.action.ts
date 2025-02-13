@@ -5,7 +5,8 @@ import { errorActions } from "../error/error.slice"
 import { RootState } from "../store"
 
 import { ErrorSource } from "../error/error.types"
-import { InitTokenRequestPayload, SetTokenRequestPayload } from "./token.types"
+import { InitTokenRequestPayload, SetTexRequestPayload, SetTokenRequestPayload } from "./token.types"
+import { createTex } from "../../hooks/useTex"
 
 export const initializeAction = () => ({
   actionCreator: tokenActions.initializeRequest,
@@ -41,6 +42,34 @@ export const setTokensAction = () => ({
       listenerApi.dispatch(
         tokenActions.setTokenSuccess({
           tokens: updatedTokens,
+        })
+      )
+    } catch (error) {
+      listenerApi.dispatch(
+        errorActions.showError({ message: "failed-to-add-token", errorSource: ErrorSource.FRONTEND })
+      )
+      listenerApi.dispatch(tokenActions.setTokenFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const setTexAction = () => ({
+  actionCreator: tokenActions.setTexRequest,
+  effect: async (
+    action: PayloadAction<SetTexRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    try {
+      console.info("create new tex")
+      const state = listenerApi.getState() as RootState
+      const provider = state.provider.provider
+      if (!provider) return
+
+      const texAddress = await createTex(provider, action.payload.texTemplateAddress)
+      console.info("create new tex SUCCESS", texAddress)
+      listenerApi.dispatch(
+        tokenActions.setTexSuccess({
+          texAddress,
         })
       )
     } catch (error) {

@@ -15,6 +15,7 @@ import {
 const initialState: AccountStoreState = {
   isInitialized: false,
   account: null,
+  tokens: [],
 }
 
 const accountSlice = createSlice({
@@ -23,14 +24,16 @@ const accountSlice = createSlice({
   reducers: {
     initializeRequest: (_, _action: PayloadAction<InitAccountRequestPayload>) => {},
     initializeSuccess: (state, action: PayloadAction<InitAccountSuccessPayload>) => {
-      state.account = action.payload.account
       state.isInitialized = true
+      state.account = action.payload.account
+      state.tokens = action.payload.tokens
     },
     initializeFailure: (_, _action: PayloadAction<InitAccountFailurePayload>) => {},
     setAccountRequest: (_, _action: PayloadAction<SetAccountRequestPayload>) => {},
     setAccountSuccess: (state, action: PayloadAction<SetAccountSuccessPayload>) => {
-      state.account = action.payload.account
       state.isInitialized = true
+      state.account = action.payload.account
+      state.tokens = action.payload.tokens
     },
     setAccountFailure: (_, _action: PayloadAction<SetAccountFailurePayload>) => {},
   },
