@@ -1,4 +1,15 @@
-import { Box, Button, Paper, TextField, Typography } from "@mui/material"
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Typography,
+} from "@mui/material"
 import React, { useState } from "react"
 import { createCoin, takeFreeCoins } from "../hooks/useTex"
 import { useDispatch, useSelector } from "react-redux"
@@ -54,8 +65,9 @@ export const Tokens = () => {
     setTokenSymbol(event.target.value)
   }
 
-  const handleTokenAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTokenAddress(event.target.value)
+  const handleTokenAddressChange = (event: SelectChangeEvent) => {
+    console.info("selected token", event.target.value)
+    setTokenAddress(event.target.value as string)
   }
 
   const handleTokenAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +110,24 @@ export const Tokens = () => {
         }}
       >
         <Typography variant="h4">Claim free tokens</Typography>
-        <TextField label="Token address" value={tokenAddress} onChange={handleTokenAddressChange} />
+        <FormControl fullWidth>
+          <InputLabel id="select-token">Token</InputLabel>
+          <Select
+            labelId="select-token"
+            id="token"
+            value={tokenAddress}
+            label="selected-token"
+            onChange={handleTokenAddressChange}
+          >
+            {tokensList.map((token) => {
+              return (
+                <MenuItem value={token.substate.component} key={token.substate.component}>
+                  {token.symbol} {token.substate.component}
+                </MenuItem>
+              )
+            })}
+          </Select>
+        </FormControl>
         <TextField
           label="Token amount"
           value={tokenAmount}
@@ -152,7 +181,7 @@ export const Tokens = () => {
           <Typography variant="h4">Created tokens</Typography>
           {tokensList.map((token, index) => (
             <Typography key={index} variant="h6">
-              {index}. {token.symbol} {token.totalSupply}
+              {index}. {token.symbol} {token.totalSupply} {token.substate.component}
             </Typography>
           ))}
         </Paper>

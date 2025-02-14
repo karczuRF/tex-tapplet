@@ -16,8 +16,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { providerSelector } from "../store/provider/provider.selector"
 import { tokensSelector } from "../store/tokens/token.selector"
 import { tokenActions } from "../store/tokens/token.slice"
-import { shortenSubstateAddress } from "../types/tapplet"
 import { accountSelector } from "../store/account/account.selector"
+import { shortenSubstateAddress } from "../helpers/address"
 
 export const JoinPool = () => {
   const provider = useSelector(providerSelector.selectProvider)

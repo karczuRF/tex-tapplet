@@ -1,7 +1,8 @@
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { accountSelector } from "../store/account/account.selector"
-import { Box, Paper, Stack, Typography } from "@mui/material"
+import { Box, Button, Paper, Stack, Typography } from "@mui/material"
 import { substateIdToString } from "@tari-project/typescript-bindings"
+import { accountActions } from "../store/account/account.slice"
 
 export const Account = () => {
   const currentAccount = useSelector(accountSelector.selectAccount)
@@ -9,6 +10,11 @@ export const Account = () => {
   console.log("[TAPP][ACCOUNT] a ", currentAccount)
   const accountAddress = substateIdToString(currentAccount?.account.address ?? null)
   console.log("[TAPP][ACCOUNT] c", accountAddress)
+  const dispatch = useDispatch()
+
+  const onClick = async () => {
+    dispatch(accountActions.setAccountRequest({ accountName: "default" }))
+  }
   return (
     <Box
       display="grid"
@@ -28,6 +34,9 @@ export const Account = () => {
           }}
         >
           <Typography variant="h4">Account</Typography>
+          <Button onClick={onClick} variant={"contained"}>
+            {`Refresh`}
+          </Button>
           <Stack direction="column" justifyContent="flex-end">
             <Typography
               variant="caption"

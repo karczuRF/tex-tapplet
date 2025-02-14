@@ -10,14 +10,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material"
-import React, { useCallback, useState } from "react"
-import { getTexPools, removeLiquidity } from "../hooks/useTex"
+import React, { useState } from "react"
+import { removeLiquidity } from "../hooks/useTex"
 import { providerSelector } from "../store/provider/provider.selector"
 import { useSelector } from "react-redux"
 import { TEX_COMPONENT_ADDRESS } from "../constants"
 import { accountSelector } from "../store/account/account.selector"
-import { shortenSubstateAddress } from "../types/tapplet"
-import { tokensSelector } from "../store/tokens/token.selector"
+import { shortenSubstateAddress } from "../helpers/address"
 
 export type InputTokensFormProps = {
   onSubmit: (lpTokenAmount: number) => void
@@ -27,7 +26,6 @@ export type InputTokensFormProps = {
 export const ExitPool = () => {
   const provider = useSelector(providerSelector.selectProvider)
   const tokens = useSelector(accountSelector.selectAccountTokens)
-  const tex = useSelector(tokensSelector.selectTex)
 
   const [lpTokenAmount, setLpTokenAmount] = useState("0")
   const [lpTokenError, setLpTokenError] = useState("")
@@ -42,8 +40,6 @@ export const ExitPool = () => {
     if (!isValidInput(lpTokenAmount)) {
       throw new Error("Please enter valid integer values")
     }
-    // await onSubmit(Number(lpTokenAmount))
-    // callback()
     await removeLiquidity(provider, TEX_COMPONENT_ADDRESS, Number(lpTokenAmount), lpAddress)
   }
 
@@ -60,15 +56,13 @@ export const ExitPool = () => {
   const handleChangeLP = (event: SelectChangeEvent) => {
     setLpAddress(event.target.value)
   }
-  const handleGetTexPools = useCallback(async () => {
-    if (!provider || !tex) return
-    const res = await getTexPools(provider, tex) //TODO fix infinite pending tx
-    console.log("refresh pools done", res)
-  }, [provider, tex])
 
-  // useEffect(() => {
-  //   handleGetTexPools()
-  // }, [account, handleGetTexPools, provider])
+  // TODO get pools list
+  // const handleGetTexPools = useCallback(async () => {
+  //   if (!provider || !tex) return
+  //   const res = await getTexPools(provider, tex)
+  //   console.log("refresh pools done", res)
+  // }, [provider, tex])
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" height="100%" width="100%">
@@ -82,7 +76,9 @@ export const ExitPool = () => {
         }}
       >
         <Typography variant="h4">Exit the pool with LP tokens </Typography>
-
+        {/* <Button onClick={handleGetTexPools} variant={"contained"}>
+          Refresh pools list
+        </Button> */}
         <Typography variant="h4">Exit your LP</Typography>
         <FormControl fullWidth>
           <InputLabel id="select-lp">LP</InputLabel>
@@ -108,9 +104,6 @@ export const ExitPool = () => {
         />
         <Button onClick={handleSubmit} variant={"contained"}>
           Exit pool
-        </Button>
-        <Button onClick={handleGetTexPools} variant={"contained"}>
-          Refresh pools list
         </Button>
       </Paper>
     </Box>
