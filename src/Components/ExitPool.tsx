@@ -14,9 +14,9 @@ import React, { useState } from "react"
 import { removeLiquidity } from "../hooks/useTex"
 import { providerSelector } from "../store/provider/provider.selector"
 import { useSelector } from "react-redux"
-import { TEX_COMPONENT_ADDRESS } from "../constants"
 import { accountSelector } from "../store/account/account.selector"
 import { shortenSubstateAddress } from "../helpers/address"
+import { tokensSelector } from "../store/tokens/token.selector"
 
 export type InputTokensFormProps = {
   onSubmit: (lpTokenAmount: number) => void
@@ -26,7 +26,7 @@ export type InputTokensFormProps = {
 export const ExitPool = () => {
   const provider = useSelector(providerSelector.selectProvider)
   const tokens = useSelector(accountSelector.selectAccountTokens)
-
+  const tex = useSelector(tokensSelector.selectTex)
   const [lpTokenAmount, setLpTokenAmount] = useState("0")
   const [lpTokenError, setLpTokenError] = useState("")
   const [lpAddress, setLpAddress] = useState("")
@@ -40,7 +40,10 @@ export const ExitPool = () => {
     if (!isValidInput(lpTokenAmount)) {
       throw new Error("Please enter valid integer values")
     }
-    await removeLiquidity(provider, TEX_COMPONENT_ADDRESS, Number(lpTokenAmount), lpAddress)
+    if (!tex) {
+      throw new Error("TEX Component not found")
+    }
+    await removeLiquidity(provider, tex, Number(lpTokenAmount), lpAddress)
   }
 
   const handleLpTokenAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {

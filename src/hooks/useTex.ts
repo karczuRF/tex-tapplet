@@ -18,35 +18,18 @@ import { getAcceptResultSubstates } from "@tari-project/tarijs/dist/builders/hel
 import { substateIdToString } from "@tari-project/typescript-bindings"
 import { AccountTemplate } from "../templates/Account"
 
+export enum Network {
+  MainNet = 0x00,
+  StageNet = 0x01,
+  NextNet = 0x02,
+  LocalNet = 0x10,
+  Igor = 0x24,
+  Esmeralda = 0x26,
+}
+
 export const FEE_AMOUNT = "2000"
 export const INIT_SUPPLY = "100000"
-// export const FAUCET_TEMPLATE_ADDRESS = "1d51f2081c9fc77637d9c9b8be21697ffbd345a7a7f3a39abb76573ca5b61e16"
-
-// export const FIRST_TOKEN_RESOURCE_ADDRESS = "resource_902fabadddb86d50beca3d1ed3d8c0eece92767f166f816d227f1a7d"
-// export const FIRST_TOKEN_COMPONENT_ADDRESS = "component_902fabadddb86d50beca3d1ed3d8c0eece92767f2b9b43034d554c34"
-// export const FIRST_TOKEN_SYMBOL = "A"
-
-// export const SECOND_TOKEN_RESOURCE_ADDRESS = "resource_e1263a8f6fd826bb3d8482bd84a7f6eef1ddb5db2fa21b9b3c79e39a"
-// export const SECOND_TOKEN_COMPONENT_ADDRESS = "component_e1263a8f6fd826bb3d8482bd84a7f6eef1ddb5db2b9b43034d554c34"
-// export const SECOND_TOKEN_SYMBOL = "B"
-
-// export const defaultFirstToken: Token = {
-//   substate: {
-//     resource: FIRST_TOKEN_RESOURCE_ADDRESS,
-//     component: FIRST_TOKEN_COMPONENT_ADDRESS,
-//   },
-//   symbol: FIRST_TOKEN_SYMBOL,
-//   balance: 0,
-// }
-
-// export const defaultSecondToken: Token = {
-//   substate: {
-//     resource: SECOND_TOKEN_RESOURCE_ADDRESS,
-//     component: SECOND_TOKEN_COMPONENT_ADDRESS,
-//   },
-//   symbol: SECOND_TOKEN_SYMBOL,
-//   balance: 0,
-// }
+export const NETWORK = Network.Igor
 
 function extractNumericPart(address: string): string {
   const match = address.match(/_(\d+)$/)
@@ -89,9 +72,9 @@ export async function createCoin(
   const coin = new CoinTemplate(coinTemplateAddress)
   // const supply = new Amount(initSupply)
 
-  console.log("👋 [tapp createCoin] account", account)
-  console.log("👋 [tapp createCoin] template", coin.templateAddress)
-  console.log("👋 [tapp createCoin] params", initSupply, symbol)
+  console.log("👋 [tapp][createCoin] account", account)
+  console.log("👋 [tapp][createCoin] template", coin.templateAddress)
+  console.log("👋 [tapp][createCoin] params", initSupply, symbol)
   const tx: Transaction = builder
     .callFunction(coin.new, [initSupply, symbol])
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
@@ -99,15 +82,19 @@ export async function createCoin(
 
   console.log("👋 [tapp createCoin] new coin tx", tx)
   const required_substates = [{ substate_id: account.address }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, NETWORK)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
-  console.log("👋 [tapp createCoin] tx resulrt", txResult)
-  console.log("👋 [tapp createCoin] tx response", response)
+  if (txResult.status === 3) {
+    console.log("✅ [tapp] tx accepted result", txResult)
+  } else {
+    console.log("❌ [tapp] tx rejected result", txResult)
+  }
+  console.log("👋 [tapp][createCoin] tx response", response)
   if (!response) throw new Error("Failed to create coin")
 
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates
   if (!upSubstates) throw new Error("No up substates found")
-  console.log("👋 [tapp createCoin] Up substates: ", upSubstates)
+  console.log("👋 [tapp][createCoin] Up substates: ", upSubstates)
   const tokenSubstate = findToken(upSubstates)
 
   return tokenSubstate
@@ -132,9 +119,14 @@ export async function createTex(provider: TariProvider, texTemplateAddress: stri
     .build()
 
   const required_substates = [{ substate_id: account.address }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, NETWORK)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
   if (!response) throw new Error("Failed to create coin")
+  if (txResult.status === 3) {
+    console.log("✅ [tapp] tx accepted result", txResult)
+  } else {
+    console.log("❌ [tapp] tx rejected result", txResult)
+  }
 
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
   if (!upSubstates) throw new Error("No up substates found")
@@ -166,15 +158,18 @@ export async function addLiquidity(
       .callMethod(tex.addLiquidity, [fromWorkspace("tokenA"), fromWorkspace("tokenB")])
       .saveVar("lptoken")
       .callMethod(accountComponent.deposit, [fromWorkspace("lptoken")])
-      // .callMethod(accountComponent.payFee, [2000]) DONT USE
       .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
       .build()
 
-    console.log("👋 [tapp addLiq] tx result", tx)
-    const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+    console.log("👋 [tapp][addLiq] tx result", tx)
+    const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, NETWORK)
     const { response, result } = await submitAndWaitForTransaction(provider, req)
-    console.log("👋 [tapp addLiq] tx result", result)
-    console.log("👋 [tapp addLiq] tx response", response)
+    if (result.status === 3) {
+      console.log("✅ [tapp] tx accepted result", result)
+    } else {
+      console.log("❌ [tapp] tx rejected result", result)
+    }
+    console.log("👋 [tapp][addLiq] tx response", response)
     return result
   } catch (error) {
     console.error(error)
@@ -203,10 +198,14 @@ export async function removeLiquidity(
     .build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, NETWORK)
   const { response, result } = await submitAndWaitForTransaction(provider, req)
-  console.log("👋 [tapp remove lp] tx result", result)
-  console.log("👋 [tapp remove lp] tx response", response)
+  if (result.status === 3) {
+    console.log("✅ [tapp] tx accepted result", result)
+  } else {
+    console.log("❌ [tapp] tx rejected result", result)
+  }
+  console.log("👋 [tapp][remove lp] tx response", response)
   return result
 }
 
@@ -222,21 +221,24 @@ export async function swap(
   const tex = new TexTemplate(texComponentAddress)
   const accountComponent = new AccountTemplate(account.address)
 
-  // TODO fix it
   const tx = builder
     .callMethod(accountComponent.withdraw, [inputTokenAddress, inputTokenAmount])
     .saveVar("inputToken")
-    .callMethod(tex.swap, [fromWorkspace("inputToken"), outputTokenAddress]) //TODO fix type error
+    .callMethod(tex.swap, [fromWorkspace("inputToken"), outputTokenAddress])
     .saveVar("swap")
     .callMethod(accountComponent.deposit, [fromWorkspace("swap")])
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texComponentAddress }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, NETWORK)
   const { response, result } = await submitAndWaitForTransaction(provider, req)
-  console.log("👋 [tapp SWAP] tx result", result)
-  console.log("👋 [tapp SWAP] tx response", response)
+  if (result.status === 3) {
+    console.log("✅ [tapp] tx accepted result", result)
+  } else {
+    console.log("❌ [tapp] tx rejected result", result)
+  }
+  console.log("👋 [tapp][SWAP] tx response", response)
   return result
 }
 
@@ -246,22 +248,22 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
   const coin = new CoinTemplate(coinTemplateAddress)
   const accountComponent = new AccountTemplate(account.address)
 
-  console.log("👋 [tapp takeFreeCoins] account", account)
-  console.log("👋 [tapp takeFreeCoins] coin template as arg", coinTemplateAddress)
-  console.log("👋 [tapp takeFreeCoins] coin.templateAddress", coin.templateAddress)
-  console.log("👋 [tapp takeFreeCoins] params", account)
+  console.log("👋 [tapp][takeFreeCoins] account", account)
+  console.log("👋 [tapp][takeFreeCoins] coin template as arg", coinTemplateAddress)
+  console.log("👋 [tapp][takeFreeCoins] coin.templateAddress", coin.templateAddress)
+  console.log("👋 [tapp][takeFreeCoins] params", account)
   const required_substates = [{ substate_id: account.address }, { substate_id: coin.templateAddress }]
-  console.log("👋 [tapp takeFreeCoins] required substate", required_substates)
+  console.log("👋 [tapp][takeFreeCoins] required substate", required_substates)
 
   const txb: Transaction = builder
     .addInput({ substateId: coinTemplateAddress as any })
     .callMethod(coin.totalSupply, [])
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
-  console.log("👋 [tapp takeFreeCoins] TOTAL SUPPLY TX", txb)
-  const reqb = buildTransactionRequest(txb, account.account_id, required_substates, [], false, 0x10)
+  console.log("👋 [tapp][takeFreeCoins] TOTAL SUPPLY TX", txb)
+  const reqb = buildTransactionRequest(txb, account.account_id, required_substates, [], false, NETWORK)
   const { response: bb, result: txResultb } = await submitAndWaitForTransaction(provider, reqb)
-  console.log("👋 [tapp takeFreeCoins] TOTAL SUPPLY RESPONSE", txb, txResultb, bb)
+  console.log("👋 [tapp][takeFreeCoins] TOTAL SUPPLY RESPONSE", txb, txResultb, bb)
 
   const tx: Transaction = builder
     .callMethod(coin.takeFreeCoins, [amount])
@@ -270,17 +272,21 @@ export async function takeFreeCoins(provider: TariUniverseProvider, coinTemplate
     .feeTransactionPayFromComponent(account.address, FEE_AMOUNT)
     .build()
 
-  console.log("👋 [tapp takeFreeCoins] new coin tx", tx)
-  console.log("👋 [tapp takeFreeCoins] required substate", required_substates)
-  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+  console.log("👋 [tapp][takeFreeCoins] new coin tx", tx)
+  console.log("👋 [tapp][takeFreeCoins] required substate", required_substates)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, NETWORK)
   const { response, result: txResult } = await submitAndWaitForTransaction(provider, req)
-  console.log("👋 [tapp takeFreeCoins] tx resulrt", txResult)
-  console.log("👋 [tapp takeFreeCoins] tx response", response)
+  if (txResult.status === 3) {
+    console.log("✅ [tapp] tx accepted result", txResult)
+  } else {
+    console.log("❌ [tapp] tx rejected result", txResult)
+  }
+  console.log("👋 [tapp][takeFreeCoins] tx response", response)
   if (!response) throw new Error("Failed to create coin: no response found")
 
   const upSubstates = getAcceptResultSubstates(txResult)?.upSubstates as any[]
-  if (!upSubstates) console.warn("👋 [tapp takeFreeCoins] No up susbsates found")
-  console.log("👋 [tapp takeFreeCoins] Up substates: ", upSubstates)
+  if (!upSubstates) console.warn("👋 [tapp][takeFreeCoins] No up susbsates found")
+  console.log("👋 [tapp][takeFreeCoins] Up substates: ", upSubstates)
 
   return txResult
 }
@@ -293,9 +299,13 @@ export async function getTexPools(provider: TariProvider, texTemplateAddress: st
   const tx = builder.callMethod(tex.pools, []).feeTransactionPayFromComponent(account.address, FEE_AMOUNT).build()
 
   const required_substates = [{ substate_id: account.address }, { substate_id: texTemplateAddress }]
-  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, 0x10)
+  const req = buildTransactionRequest(tx, account.account_id, required_substates, [], false, NETWORK)
   const { response, result } = await submitAndWaitForTransaction(provider, req)
-  console.log("👋 [tapp remove lp] tx result", result)
-  console.log("👋 [tapp remove lp] tx response", response)
+  if (result.status === 3) {
+    console.log("✅ [tapp] tx accepted result", result)
+  } else {
+    console.log("❌ [tapp] tx rejected result", result)
+  }
+  console.log("👋 [tapp][remove lp] tx response", response)
   return result
 }
