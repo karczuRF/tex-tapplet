@@ -25,7 +25,7 @@ export const JoinPool = () => {
   const tex = useSelector(tokensSelector.selectTex)
   const dispatch = useDispatch()
 
-  const [texTemplateAddress, setTexTemplateAddress] = useState("")
+  const [texAddress, setTexAddress] = useState("")
   const [firstTokenAmount, setFirstTokenAmount] = useState("0")
   const [secondTokenAmount, setSecondTokenAmount] = useState("0")
   const [firstTokenError, setFirstTokenError] = useState("")
@@ -52,9 +52,13 @@ export const JoinPool = () => {
       Number(secondTokenAmount)
     )
   }
-  const onClickCreate = async () => {
-    console.log("tapplet create tex", texTemplateAddress)
-    dispatch(tokenActions.setTexRequest({ texTemplateAddress }))
+  const onClickCreateTex = async () => {
+    console.log("tapplet create tex", texAddress)
+    dispatch(tokenActions.setTexRequest({ texAddress }))
+  }
+  const onClickSetExistingTex = async () => {
+    console.log("tapplet create tex", texAddress)
+    dispatch(tokenActions.setExistingTexRequest({ texAddress }))
   }
 
   const handleFirstTokenAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,7 +83,7 @@ export const JoinPool = () => {
 
   const handleTexTemplateAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
-    setTexTemplateAddress(value)
+    setTexAddress(value)
   }
 
   const handleChangeTokenA = (event: SelectChangeEvent) => {
@@ -104,14 +108,13 @@ export const JoinPool = () => {
             height: "100%",
           }}
         >
-          <Typography variant="h4">No Tex found. Create new one. {tex}</Typography>
-          <TextField
-            label="Tex template address"
-            value={texTemplateAddress}
-            onChange={handleTexTemplateAddressChange}
-          />
-          <Button onClick={onClickCreate} variant={"contained"}>
+          <Typography variant="h4">No Tex found. Create new or add existing one. {tex}</Typography>
+          <TextField label="Tex template address" value={texAddress} onChange={handleTexTemplateAddressChange} />
+          <Button onClick={onClickCreateTex} variant={"contained"}>
             {`Create Tex`}
+          </Button>
+          <Button onClick={onClickSetExistingTex} variant={"contained"}>
+            {`Add existing Tex`}
           </Button>
         </Paper>
       ) : (
@@ -178,7 +181,7 @@ export const JoinPool = () => {
             helperText={secondTokenError}
             required
           />
-          <Button onClick={handleSubmit} variant={"contained"}>
+          <Button onClick={handleSubmit} variant={"contained"} disabled={!tex}>
             Submit
           </Button>
         </Paper>

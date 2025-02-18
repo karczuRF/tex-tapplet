@@ -124,8 +124,8 @@ export const Swap = () => {
           <Switch value={firstToSecond} onChange={() => setFirstToSecond(!firstToSecond)} />
           <Typography>{firstToSecond ? "Token A to Token B" : "Token B to Token A"}</Typography>
         </Box>
-        <Button onClick={handleSubmit} variant={"contained"}>
-          Submit
+        <Button onClick={handleSubmit} variant={"contained"} disabled={!tex}>
+          SWAP
         </Button>
       </Paper>
     </Box>

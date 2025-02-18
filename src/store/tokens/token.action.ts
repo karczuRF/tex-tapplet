@@ -65,8 +65,30 @@ export const setTexAction = () => ({
       const provider = state.provider.provider
       if (!provider) return
 
-      const texAddress = await createTex(provider, action.payload.texTemplateAddress)
+      const texAddress = await createTex(provider, action.payload.texAddress)
       console.info("create new tex SUCCESS", texAddress)
+      listenerApi.dispatch(
+        tokenActions.setTexSuccess({
+          texAddress,
+        })
+      )
+    } catch (error) {
+      listenerApi.dispatch(
+        errorActions.showError({ message: "failed-to-add-token", errorSource: ErrorSource.FRONTEND })
+      )
+      listenerApi.dispatch(tokenActions.setTokenFailure({ errorMsg: error as string }))
+    }
+  },
+})
+
+export const setExistingTexAction = () => ({
+  actionCreator: tokenActions.setExistingTexRequest,
+  effect: async (
+    action: PayloadAction<SetTexRequestPayload>,
+    listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>
+  ) => {
+    try {
+      const texAddress = action.payload.texAddress
       listenerApi.dispatch(
         tokenActions.setTexSuccess({
           texAddress,

@@ -105,7 +105,7 @@ export const ExitPool = () => {
           helperText={lpTokenError}
           required
         />
-        <Button onClick={handleSubmit} variant={"contained"}>
+        <Button onClick={handleSubmit} variant={"contained"} disabled={!tex}>
           Exit pool
         </Button>
       </Paper>

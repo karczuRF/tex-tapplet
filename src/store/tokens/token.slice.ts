@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 import { listenerMiddleware } from "../store.listener"
-import { initializeAction, setTexAction, setTokensAction } from "./token.action"
+import { initializeAction, setExistingTexAction, setTexAction, setTokensAction } from "./token.action"
 import {
   InitTokenFailurePayload,
   InitTokenRequestPayload,
@@ -34,6 +34,7 @@ const tokenSlice = createSlice({
     },
     setTokenFailure: (_, _action: PayloadAction<SetTokenFailurePayload>) => {},
     setTexRequest: (_, _action: PayloadAction<SetTexRequestPayload>) => {},
+    setExistingTexRequest: (_, _action: PayloadAction<SetTexRequestPayload>) => {},
     setTexSuccess: (state, action: PayloadAction<SetTexSuccessPayload>) => {
       state.texAddress = action.payload.texAddress
     },
@@ -46,3 +47,4 @@ export const tokenReducer = tokenSlice.reducer
 listenerMiddleware.startListening(initializeAction())
 listenerMiddleware.startListening(setTokensAction())
 listenerMiddleware.startListening(setTexAction())
+listenerMiddleware.startListening(setExistingTexAction())

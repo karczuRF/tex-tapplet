@@ -23,7 +23,7 @@ export type SetTokenFailurePayload = {
   errorMsg: string
 }
 export type SetTexRequestPayload = {
-  texTemplateAddress: string
+  texAddress: string
 }
 export type SetTexSuccessPayload = {
   texAddress: string
