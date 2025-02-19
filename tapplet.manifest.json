@@ -1,16 +1,16 @@
 {
   "packageName": "tex-tapplet",
-  "version": "0.1.1",
-  "displayName": "TEX TAPPLET",
+  "version": "1.0.3",
+  "displayName": "TEX",
   "status": "WIP",
   "category": "TEST",
   "author": {
-    "name": "",
+    "name": "karczuRF",
     "website": "https://api.github.com/users/karczuRF/repos"
   },
   "about": {
-    "summary": "Tapplet summary",
-    "description": "Tapplet description"
+    "summary": "TEX Tapplet",
+    "description": "TariEXchange Tapplet"
   },
   "audits": [
     {
@@ -19,35 +19,43 @@
     }
   ],
   "design": {
-    "logoPath": "src/assets/react.svg",
-    "backgroundPath": "src/assets/react.svg"
+    "logoPath": "src/images/logo.svg",
+    "backgroundPath": "src/images/background.svg"
   },
   "repository": {
     "type": "git",
     "url": "",
-    "codeowners": ["@karczuRF"]
+    "codeowners": [
+      "@karczuRF"
+    ]
   },
   "source": {
     "location": {
-      "npm": {}
+      "npm": {
+        "packageName": "tex-tapplet",
+        "registry": "https://registry.npmjs.org/",
+        "distTarball": "https://registry.npmjs.org/tex-tapplet/-/tex-tapplet-1.0.3.tgz",
+        "integrity": "sha512-H3Ntq7Sus1hNOUwVtUUOEO+jbHHIyej0UTCRE925lAimAjv0LG9UijLYPdYscFdtOz928LsPDAcpYQ68yg0Bbw=="
+      }
     }
   },
-  "supportedChain": ["MAINNET", "STAGENET", "NEXTNET"],
-  "permissions": {
-    "requiredPermissions": [
-      "TariPermissionNftGetOwnershipProof",
-      "TariPermissionAccountBalance",
-      "TariPermissionAccountInfo",
-      "TariPermissionAccountList",
-      "TariPermissionKeyList",
-      "TariPermissionTransactionGet",
-      "TariPermissionTransactionSend",
-      "TariPermissionGetNft",
-      "TariPermissionTransactionsGet",
-      "TariPermissionSubstatesRead",
-      "TariPermissionTemplatesRead"
-    ],
-    "optionalPermissions": []
-  },
+  "supportedChain": [
+    "MAINNET",
+    "STAGENET",
+    "NEXTNET"
+  ],
+  "permissions": [
+    "TariPermissionNftGetOwnershipProof",
+    "TariPermissionAccountBalance",
+    "TariPermissionAccountInfo",
+    "TariPermissionAccountList",
+    "TariPermissionKeyList",
+    "TariPermissionTransactionGet",
+    "TariPermissionTransactionSend",
+    "TariPermissionGetNft",
+    "TariPermissionTransactionsGet",
+    "TariPermissionSubstatesRead",
+    "TariPermissionTemplatesRead"
+  ],
   "manifestVersion": "1.0.0"
 }
