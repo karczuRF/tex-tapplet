@@ -1,4 +1,4 @@
-import { TariMethodDefinition, WorkspaceArg } from "@tari-project/tarijs"
+import { TariMethodDefinition, WorkspaceArg } from "@tari-project/tarijs-builders"
 import { TemplateFactory } from "@tari-project/tarijs/dist/templates"
 import { ConfidentialWithdrawProof, NonFungibleId, ResourceAddress } from "@tari-project/typescript-bindings"
 

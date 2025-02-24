@@ -1,11 +1,7 @@
 import { ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { InitProviderRequestPayload, UpdatePermissionsRequestPayload } from "./provider.types"
 import { providerActions } from "./provider.slice"
-import {
-  TariPermissions,
-  TariUniverseProvider,
-  TariUniverseProviderParameters,
-} from "@tari-project/tarijs/dist/providers/tari_universe"
+import { TariPermissions, TariUniverseProvider, TariUniverseProviderParameters } from "@tari-project/tarijs"
 
 export const initializeAction = () => ({
   actionCreator: providerActions.initializeRequest,

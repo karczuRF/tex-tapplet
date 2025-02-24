@@ -1,4 +1,9 @@
-import { ResourceAddress, TariFunctionDefinition, TariMethodDefinition, WorkspaceArg } from "@tari-project/tarijs"
+import {
+  ResourceAddress,
+  TariFunctionDefinition,
+  TariMethodDefinition,
+  WorkspaceArg,
+} from "@tari-project/tarijs-builders"
 import { TemplateFactory } from "@tari-project/tarijs/dist/templates"
 
 interface NewFunction extends TariFunctionDefinition {

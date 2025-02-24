@@ -14,8 +14,8 @@ import {
 import { TexTemplate } from "../templates/Tex"
 import { Token, TokenSubstate } from "../templates/types"
 import { CoinTemplate } from "../templates/Coin"
-import { getAcceptResultSubstates } from "@tari-project/tarijs/dist/builders/helpers/submitTransaction"
 import { substateIdToString } from "@tari-project/typescript-bindings"
+import { getAcceptResultSubstates } from "@tari-project/tarijs-builders/dist/helpers/submitTransaction"
 import { AccountTemplate } from "../templates/Account"
 
 export enum Network {

@@ -1,4 +1,4 @@
-import { TariPermission } from "@tari-project/tarijs/dist/providers/tari_universe"
+import { TariPermission } from "@tari-project/tari-permissions"
 
 export interface TappletPermissions {
   requiredPermissions: TariPermission[]
