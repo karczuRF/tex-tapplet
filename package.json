@@ -1,7 +1,6 @@
 {
   "name": "tex-tapplet",
-  "private": true,
-  "version": "0.0.0",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,10 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "latest",
+    "@emotion/styled": "latest",
     "@mui/icons-material": "^6.4.1",
     "@mui/material": "^6.4.1",
+    "@reduxjs/toolkit": "^2.5.1",
+    "@tari-project/tari-permissions": "^0.4.0",
+    "@tari-project/tarijs": "^0.4.0",
+    "@tari-project/tarijs-builders": "^0.4.0",
+    "@tari-project/typescript-bindings": "^1.4.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
